@@ -7316,44 +7316,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "zoro"
-version = "0.2.0"
-dependencies = [
- "alloy",
- "anyhow",
- "axum",
- "base64",
- "chrono",
- "clap",
- "dashmap",
- "dotenv",
- "futures-util",
- "miden-assembly",
- "miden-client",
- "miden-client-sqlite-store",
- "miden-lib",
- "miden-objects",
- "miden-tx",
- "rand 0.9.2",
- "reqwest",
- "reqwest-eventsource",
- "serde",
- "serde_json",
- "tokio",
- "toml",
- "tower",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "url",
- "uuid",
- "zoro_curve 0.2.0",
- "zoro_curve 0.2.0 (git+ssh://git@github.com/zoroswap/zoro-curve.git)",
- "zoro_miden_client",
- "zoro_primitives 0.2.0",
-]
-
-[[package]]
 name = "zoro_curve"
 version = "0.2.0"
 dependencies = [
@@ -7398,4 +7360,42 @@ version = "0.2.0"
 source = "git+ssh://git@github.com/zoroswap/zoro-curve.git#115501f33800cb7375ef3db0709dac5a3a4cf2fd"
 dependencies = [
  "alloy",
+]
+
+[[package]]
+name = "zoroswap"
+version = "0.2.0"
+dependencies = [
+ "alloy",
+ "anyhow",
+ "axum",
+ "base64",
+ "chrono",
+ "clap",
+ "dashmap",
+ "dotenv",
+ "futures-util",
+ "miden-assembly",
+ "miden-client",
+ "miden-client-sqlite-store",
+ "miden-lib",
+ "miden-objects",
+ "miden-tx",
+ "rand 0.9.2",
+ "reqwest",
+ "reqwest-eventsource",
+ "serde",
+ "serde_json",
+ "tokio",
+ "toml",
+ "tower",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "uuid",
+ "zoro_curve 0.2.0",
+ "zoro_curve 0.2.0 (git+ssh://git@github.com/zoroswap/zoro-curve.git)",
+ "zoro_miden_client",
+ "zoro_primitives 0.2.0",
 ]
