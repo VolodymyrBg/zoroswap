@@ -110,8 +110,10 @@ Requires a folder structure where both repositories are on the same level:
 
 ```
 zoroswap/
+├── Cargo.toml
 └── ...
 zoro-curve/
+├── Cargo.toml
 └── ...
 ```
 
