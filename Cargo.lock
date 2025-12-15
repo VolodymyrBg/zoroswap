@@ -7320,16 +7320,7 @@ name = "zoro_curve"
 version = "0.2.0"
 dependencies = [
  "alloy",
- "zoro_primitives 0.2.0 (git+https://github.com/zoroswap/zoroswap.git)",
-]
-
-[[package]]
-name = "zoro_curve"
-version = "0.2.0"
-source = "git+ssh://git@github.com/zoroswap/zoro-curve.git#7a8c0a4ee9f006c7999dd5f586092902d2f9f2ed"
-dependencies = [
- "alloy",
- "zoro_primitives 0.2.0 (git+https://github.com/zoroswap/zoroswap.git)",
+ "zoro_primitives",
 ]
 
 [[package]]
@@ -7350,14 +7341,6 @@ dependencies = [
 [[package]]
 name = "zoro_primitives"
 version = "0.2.0"
-dependencies = [
- "alloy",
-]
-
-[[package]]
-name = "zoro_primitives"
-version = "0.2.0"
-source = "git+https://github.com/zoroswap/zoroswap.git#c627250a271f02cbf64e044050bfe9d38150f14e"
 dependencies = [
  "alloy",
 ]
@@ -7394,8 +7377,7 @@ dependencies = [
  "tracing-subscriber",
  "url",
  "uuid",
- "zoro_curve 0.2.0",
- "zoro_curve 0.2.0 (git+ssh://git@github.com/zoroswap/zoro-curve.git)",
+ "zoro_curve",
  "zoro_miden_client",
- "zoro_primitives 0.2.0",
+ "zoro_primitives",
 ]

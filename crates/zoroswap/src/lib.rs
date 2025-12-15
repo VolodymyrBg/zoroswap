@@ -23,6 +23,3 @@ pub use zoro_primitives::*;
 
 #[cfg(feature = "zoro-curve-local")]
 pub use zoro_curve_local::*;
-
-#[cfg(feature = "zoro-curve-private-repo")]
-pub use zoro_curve_private_repo::*;

@@ -87,7 +87,7 @@ its functionality.
 | Curve | Feature Flag                                                         | Repository                                                                 | Use Case |
 |-------|----------------------------------------------------------------------|----------------------------------------------------------------------------|----------|
 | **`DummyCurve`** | `default` (always available)                                         | [Public in `zoro_primitives`](./crates/zoro_primitives/src/dummy_curve.rs) | Development, testing, reference |
-| **`ZoroCurve`** | `--features zoro-curve-local` or `--features zoro-curve-private-repo` | Private                          | Production, proprietary algorithm |
+| **`ZoroCurve`** | `--features zoro-curve-local` | Private                          | Production, proprietary algorithm |
 
 ### Using the Default Curve
 
@@ -101,17 +101,9 @@ cargo build
 
 ### Using the Proprietary Curve
 
-#### From the private `zoro-curve` repository (installation on a server)
-
-```sh
-cargo run --bin server --features zoro-curve-private-repo
-cargo test --features zoro-curve-private-repo
-cargo install --features zoro-curve-private-repo
-```
-
-#### From a local folder (local development)
-
-Requires a folder structure where both repositories are on the same level:
+Requires a folder structure where both repositories ([`zoroswap`](https://github.com/zoroswap/zoroswap)
+and [`zoro-curve`](https://github.com/zoroswap/zoro-curve)) are checked out 
+on the same level:
 
 ```
 zoroswap/
