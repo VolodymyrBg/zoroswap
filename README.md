@@ -15,10 +15,64 @@ You can find our testnet deployment here: [https://zoroswap.com](https://zoroswa
 
 ## Table of Contents
 
-- [Setup](#setup)
-- [Curve Setup](#curve-setup)  
+- [Curve Setup](#curve-setup)
+- [ZoroSwap Setup](#setup)
 
-## Setup
+## Curve Setup
+
+Zoro uses a pluggable curve implementation for AMM calculations. By default, it uses a simple
+linear curve ([`DummyCurve`](./crates/zoro_primitives/src/dummy_curve.rs)) to demonstrate
+its functionality.
+
+| Curve             | Feature Flag                  | Repository                                                                 | Use Case                          |
+|-------------------|-------------------------------|----------------------------------------------------------------------------|-----------------------------------|
+| **`DummyCurve`**  | `default` (always available)  | [Public in `zoro_primitives`](./crates/zoro_primitives/src/dummy_curve.rs) | Development, testing, reference   |
+| **`ZoroCurve`**   | `--features zoro-curve-local` | Private                                                                    | Production, proprietary algorithm |
+
+### Using the Default Curve
+
+The default build uses the `DummyCurve` implementation:
+
+```sh
+# Make sure that there is a placeholder crate in the folder above
+# the clone of this repository.
+#
+# We need this folder structure:
+# zoroswap/
+# ├── Cargo.toml
+# └── ...
+# zoro-curve/
+# ├── Cargo.toml
+# └── ...
+cargo new --name zoro_curve ../zoro-curve
+
+cargo build
+```
+
+### Using the Proprietary Curve
+
+Requires a folder structure where both repositories ([`zoroswap`](https://github.com/zoroswap/zoroswap)
+and [`zoro-curve`](https://github.com/zoroswap/zoro-curve)) are checked out
+on the same level:
+
+```
+zoroswap/
+├── Cargo.toml
+└── ...
+zoro-curve/
+├── Cargo.toml
+└── ...
+```
+
+```sh
+cargo run --bin server --features zoro-curve-local
+cargo test --features zoro-curve-local
+cargo install --features zoro-curve-local
+```
+
+## ZoroSwap Setup
+
+Make sure you have followed the above instructions for setting up the curve!
 
 ### 1. Copy environment and app configs
 
@@ -77,45 +131,3 @@ cargo test --release e2e_private_note -- --exact --nocapture
 3. Create a `ZOROSWAP` note requesting a swap of minted assets in line with current oracle prices and send it as a public note to testnet or via endpoint.
 4. Server should pick up the emitted note, consume it and execute against the pool we created earlier and emit new `P2ID` targeted at the user with swapped assets.
 5. Consume the `P2ID` emitted by the server concluding the test.
-
-## Curve Setup
-
-Zoro uses a pluggable curve implementation for AMM calculations. By default, it uses a simple
-linear curve ([`DummyCurve`](./crates/zoro_primitives/src/dummy_curve.rs)) to demonstrate 
-its functionality.
-
-| Curve | Feature Flag                                                         | Repository                                                                 | Use Case |
-|-------|----------------------------------------------------------------------|----------------------------------------------------------------------------|----------|
-| **`DummyCurve`** | `default` (always available)                                         | [Public in `zoro_primitives`](./crates/zoro_primitives/src/dummy_curve.rs) | Development, testing, reference |
-| **`ZoroCurve`** | `--features zoro-curve-local` | Private                          | Production, proprietary algorithm |
-
-### Using the Default Curve
-
-The default build uses the `DummyCurve` implementation:
-
-```sh
-cargo build
-```
-
-**Note:** The (linear) dummy curve is just here to demonstrate the functionality!
-
-### Using the Proprietary Curve
-
-Requires a folder structure where both repositories ([`zoroswap`](https://github.com/zoroswap/zoroswap)
-and [`zoro-curve`](https://github.com/zoroswap/zoro-curve)) are checked out 
-on the same level:
-
-```
-zoroswap/
-├── Cargo.toml
-└── ...
-zoro-curve/
-├── Cargo.toml
-└── ...
-```
-
-```sh
-cargo run --bin server --features zoro-curve-local
-cargo test --features zoro-curve-local
-cargo install --features zoro-curve-local
-```
