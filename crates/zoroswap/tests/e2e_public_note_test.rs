@@ -10,12 +10,12 @@ use miden_client::{
     note::{NoteAssets, NoteDetails, NoteTag, NoteType},
     transaction::{OutputNote, TransactionRequestBuilder},
 };
-use zoro::{
+use zoro_miden_client::{create_basic_account, wait_for_consumable_notes, wait_for_note};
+use zoroswap::{
     Config, ZoroStorageSettings, create_expected_p2id_recipient, create_zoroswap_note,
     fetch_vault_for_account_from_chain, get_oracle_prices, instantiate_client, print_note_info,
     print_transaction_info,
 };
-use zoro_miden_client::{create_basic_account, wait_for_consumable_notes, wait_for_note};
 
 #[tokio::test]
 async fn e2e_public_note() -> Result<()> {

@@ -59,7 +59,9 @@ impl AmmState {
             instantiate_simple_client(self.config.keystore_path, &self.config.miden_endpoint)
                 .await?;
         for liq_pool in self.config.liquidity_pools.iter() {
-            let _ = miden_client.import_account_by_id(liq_pool.faucet_id).await?;
+            let _ = miden_client
+                .import_account_by_id(liq_pool.faucet_id)
+                .await?;
             if let Some(acc) = miden_client.get_account(liq_pool.faucet_id).await? {
                 let faucet: BasicFungibleFaucet = BasicFungibleFaucet::try_from(acc.account())?;
                 self.faucet_metadata.insert(liq_pool.faucet_id, faucet);

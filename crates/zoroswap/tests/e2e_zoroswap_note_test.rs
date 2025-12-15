@@ -11,8 +11,8 @@ use miden_client::{
 };
 use miden_client_sqlite_store::ClientBuilderSqliteExt;
 use std::sync::Arc;
-use zoro::{create_zoroswap_note, fetch_vault_for_account_from_chain};
 use zoro_miden_client::{create_p2id_note, setup_accounts_and_faucets};
+use zoroswap::{create_zoroswap_note, fetch_vault_for_account_from_chain};
 
 #[tokio::test]
 async fn zero_note_create_consume_with_refund_test() -> Result<()> {

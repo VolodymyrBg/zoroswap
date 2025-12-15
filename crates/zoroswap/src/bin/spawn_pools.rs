@@ -18,10 +18,10 @@ use miden_objects::{account::AccountComponent, assembly::Assembler};
 use rand::RngCore;
 use std::{fs, path::Path, time::Duration};
 use tracing::info;
-use zoro::{
+use zoro_miden_client::{create_library, instantiate_simple_client};
+use zoroswap::{
     Config, fetch_pool_state_from_chain, fetch_vault_for_account_from_chain, print_transaction_info,
 };
-use zoro_miden_client::{create_library, instantiate_simple_client};
 
 #[derive(Parser, Debug)]
 #[command(name = "spawn_pools")]
