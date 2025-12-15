@@ -2,10 +2,12 @@ use alloy::primitives::{I256, U256};
 use anyhow::{Result, anyhow};
 use miden_client::account::AccountId;
 use std::{collections::HashMap, str::FromStr};
-#[cfg(feature = "zoro-curve")]
-use zoro_curve::ZoroCurve as ConfiguredCurve;
+#[cfg(feature = "zoro-curve-local")]
+use zoro_curve_local::ZoroCurve as ConfiguredCurve;
+#[cfg(feature = "zoro-curve-private-repo")]
+use zoro_curve_private_repo::ZoroCurve as ConfiguredCurve;
 use zoro_miden_client::MidenClient;
-#[cfg(not(feature = "zoro-curve"))]
+#[cfg(not(any(feature = "zoro-curve-local", feature = "zoro-curve-private-repo")))]
 use zoro_primitives::dummy_curve::DummyCurve as ConfiguredCurve;
 use zoro_primitives::traits::Curve;
 

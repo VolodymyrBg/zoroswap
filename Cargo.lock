@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "alloy-chains"
-version = "0.2.21"
+version = "0.2.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b9ebac8ff9c2f07667e1803dc777304337e160ce5153335beb45e8ec0751808"
+checksum = "35d744058a9daa51a8cf22a3009607498fcf82d3cf4c5444dd8056cdf651f471"
 dependencies = [
  "alloy-primitives",
  "num_enum",
@@ -2245,9 +2245,9 @@ dependencies = [
 
 [[package]]
 name = "fs-err"
-version = "3.2.0"
+version = "3.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62d91fd049c123429b018c47887d3f75a265540dd3c30ba9cb7bae9197edb03a"
+checksum = "824f08d01d0f496b3eca4f001a13cf17690a6ee930043d20817f547455fd98f8"
 dependencies = [
  "autocfg",
 ]
@@ -2762,9 +2762,9 @@ checksum = "7aedcccd01fc5fe81e6b489c15b247b8b0690feb23304303a9e560f37efc560a"
 
 [[package]]
 name = "icu_properties"
-version = "2.1.1"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e93fcd3157766c0c8da2f8cff6ce651a31f0810eaa1c51ec363ef790bbb5fb99"
+checksum = "020bfc02fe870ec3a66d93e677ccca0562506e5872c650f893269e08615d74ec"
 dependencies = [
  "icu_collections",
  "icu_locale_core",
@@ -2776,9 +2776,9 @@ dependencies = [
 
 [[package]]
 name = "icu_properties_data"
-version = "2.1.1"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02845b3647bb045f1100ecd6480ff52f34c35f82d9880e029d329c21d1054899"
+checksum = "616c294cf8d725c6afcd8f55abc17c56464ef6211f9ed59cccffe534129c77af"
 
 [[package]]
 name = "icu_provider"
@@ -4822,9 +4822,9 @@ checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 
 [[package]]
 name = "reqwest"
-version = "0.12.24"
+version = "0.12.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d0946410b9f7b082a427e4ef5c8ff541a88b357bc6c637c40db3a68ac70a36f"
+checksum = "3b4c14b2d9afca6a60277086b0cc6a6ae0b568f6f7916c943a8cdc79f8be240f"
 dependencies = [
  "base64",
  "bytes",
@@ -6157,9 +6157,9 @@ dependencies = [
 
 [[package]]
 name = "tower-http"
-version = "0.6.7"
+version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9cf146f99d442e8e68e585f5d798ccd3cad9a7835b917e09728880a862706456"
+checksum = "d4e6559d53cc268e5031cd8429d05415bc4cb4aefc4aa5d6cc35fbf5b924a1f8"
 dependencies = [
  "bitflags",
  "bytes",
@@ -7347,9 +7347,10 @@ dependencies = [
  "tracing-subscriber",
  "url",
  "uuid",
- "zoro_curve",
+ "zoro_curve 0.2.0",
+ "zoro_curve 0.2.0 (git+ssh://git@github.com/zoroswap/zoro-curve.git)",
  "zoro_miden_client",
- "zoro_primitives",
+ "zoro_primitives 0.2.0",
 ]
 
 [[package]]
@@ -7357,7 +7358,16 @@ name = "zoro_curve"
 version = "0.2.0"
 dependencies = [
  "alloy",
- "zoro_primitives",
+ "zoro_primitives 0.2.0",
+]
+
+[[package]]
+name = "zoro_curve"
+version = "0.2.0"
+source = "git+ssh://git@github.com/zoroswap/zoro-curve.git#115501f33800cb7375ef3db0709dac5a3a4cf2fd"
+dependencies = [
+ "alloy",
+ "zoro_primitives 0.2.0 (git+ssh://git@github.com/zoroswap/zoro-curve.git)",
 ]
 
 [[package]]
@@ -7378,6 +7388,14 @@ dependencies = [
 [[package]]
 name = "zoro_primitives"
 version = "0.2.0"
+dependencies = [
+ "alloy",
+]
+
+[[package]]
+name = "zoro_primitives"
+version = "0.2.0"
+source = "git+ssh://git@github.com/zoroswap/zoro-curve.git#115501f33800cb7375ef3db0709dac5a3a4cf2fd"
 dependencies = [
  "alloy",
 ]

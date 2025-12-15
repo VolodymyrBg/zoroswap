@@ -9,7 +9,8 @@ use alloy::primitives::{I256, U256};
 /// # Warning
 ///
 /// This is a dummy implementation and should not be used in production.
-/// To use the production curve, enable the `zoro-curve` feature.
+/// To use the production curve, enable the `zoro-curve-local` or
+/// `zoro-curve-private-repo` feature.
 #[cfg(feature = "dummy-curve")]
 #[derive(Debug, Clone, Copy)]
 pub struct DummyCurve;

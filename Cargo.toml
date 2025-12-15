@@ -1,7 +1,6 @@
 [workspace]
 members = [
 	"crates/zoro",
-	"crates/zoro_curve",
 	"crates/zoro_primitives",
 	"crates/zoro_miden_client"
 ]

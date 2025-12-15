@@ -77,7 +77,8 @@ cargo test --release e2e_private_note -- --exact --nocapture
 ## Curve Implementation
 
 Zoro uses a pluggable curve implementation for AMM calculations. By default, it uses a simple
-linear curve (`DummyCurve`) to demonstrate its functionality.
+linear curve ([`DummyCurve`](./crates/zoro_primitives/src/dummy_curve.rs)) to demonstrate 
+its functionality.
 
 ### Using the Default (Linear) Curve
 
@@ -91,16 +92,18 @@ cargo build
 
 ### Using the Proprietary Zoro Curve
 
-If you have access to the proprietary `zoro_curve` crate, you can enable it with
-the `zoro-curve` feature:
+#### From a local folder
 
 ```sh
-cargo build --features zoro-curve
-cargo run --bin server --features zoro-curve
+cargo run --bin server --features zoro-curve-local
+cargo test --features zoro-curve-local
+cargo install --features zoro-curve-local
 ```
 
-For testing with the Zoro curve:
+#### From the private `zoro-curve` repository
 
 ```sh
-cargo test --features zoro-curve
+cargo run --bin server --features zoro-curve-private-repo
+cargo test --features zoro-curve-private-repo
+cargo install --features zoro-curve-private-repo
 ```
