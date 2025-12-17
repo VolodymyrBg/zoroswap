@@ -11,7 +11,8 @@ use miden_client::{
     auth::AuthSecretKey,
     crypto::FeltRng,
     keystore::FilesystemKeyStore,
-    note::{NoteTag, NoteType},
+    note::{Note, NoteId, NoteTag, NoteType},
+    store::NoteFilter,
     transaction::{OutputNote, TransactionRequestBuilder},
 };
 use miden_lib::{
@@ -20,9 +21,11 @@ use miden_lib::{
 };
 use miden_objects::{account::AccountComponent, assembly::Assembler};
 use rand::RngCore;
-use std::{fs, path::Path, time::Duration};
+use std::{collections::HashSet, fs, path::Path, time::Duration};
 use tracing::info;
-use zoro_miden_client::{create_basic_account, create_library, instantiate_simple_client};
+use zoro_miden_client::{
+    MidenClient, create_basic_account, create_library, instantiate_simple_client,
+};
 use zoroswap::{
     Config, create_deposit_note, fetch_pool_state_from_chain, fetch_vault_for_account_from_chain,
     print_transaction_info,
@@ -236,11 +239,6 @@ async fn main() -> Result<()> {
 
     println!("\n[STEP 2] Mint tokens from our faucet to two_pools_account");
 
-    let account = client
-        .get_account(pool_contract.id())
-        .await?
-        .ok_or(anyhow!("Account {:?} not found.", pool_contract.id()))?;
-
     let (lp_account, _) = create_basic_account(&mut client, keystore.clone()).await?;
 
     let amount = 1000000;
@@ -279,11 +277,11 @@ async fn main() -> Result<()> {
                 .submit_new_transaction(lp_account.id(), transaction_request)
                 .await?;
 
-            println!("All of liq pool's notes consumed successfully.");
+            println!("All of liq pool's P2ID notes consumed successfully.");
             break;
         } else {
             println!(
-                "Currently, liq pool has {} consumable notes. Waiting...",
+                "Currently, liq pool has {} consumable P2ID notes. Waiting...",
                 list_of_note_ids.len()
             );
             tokio::time::sleep(Duration::from_secs(3)).await;
@@ -292,6 +290,8 @@ async fn main() -> Result<()> {
 
     // Re-sync so minted notes become visible
     client.sync_state().await?;
+
+    let pool_contract_tag = NoteTag::from_account_id(pool_contract.id());
 
     // Retrieve updated contract data to see the state
     let account = client
@@ -336,8 +336,8 @@ async fn main() -> Result<()> {
             vec![asset_in.into()],
             lp_account.id(),
             deposit_serial_num,
-            NoteTag::from_account_id(pool_contract.id()),
-            NoteType::Private,
+            pool_contract_tag,
+            NoteType::Public,
         )?;
 
         let note_req = TransactionRequestBuilder::new()
@@ -353,35 +353,45 @@ async fn main() -> Result<()> {
         client.sync_state().await?;
     }
 
+    // Consume DEPOSIT notes by POOL CONTRACT
+    let mut failed_notes: HashSet<NoteId> = HashSet::new();
+
     loop {
-        if true {
-            break;
-        }
-        // @todo: implement waiting for refund notes
+        ////////    !!!!!!!!!!!!!!!!!!!!!!!!!
 
         // Resync to get the latest data
-        // client.sync_state().await?;
+        match fetch_new_notes_by_tag(&mut client, &pool_contract_tag).await {
+            Ok(notes) => {
+                let valid_notes: Vec<&Note> = notes
+                    .iter()
+                    .filter(|n| !failed_notes.contains(&n.id()))
+                    .collect();
 
-        // let consumable_notes = client.get_consumable_notes(Some(lp_account.id())).await?;
-        // let list_of_note_ids: Vec<_> = consumable_notes.iter().map(|(note, _)| note.id()).collect();
+                let number_of_notes = valid_notes.len();
+                if number_of_notes == config.liquidity_pools.len() {
+                    println!(
+                        "Found consumable DEPOSIT notes for pool contract account. Consuming them now..."
+                    );
+                    let transaction_request = TransactionRequestBuilder::new()
+                        .build_consume_notes(valid_notes.iter().map(|n| n.id()).collect())?;
+                    let _tx_id = client
+                        .submit_new_transaction(lp_account.id(), transaction_request)
+                        .await?;
 
-        // if list_of_note_ids.len() == config.liquidity_pools.len() {
-        //     println!("Found consumable notes for lp account. Consuming them now...");
-        //     let transaction_request =
-        //         TransactionRequestBuilder::new().build_consume_notes(list_of_note_ids)?;
-        //     let _tx_id = client
-        //         .submit_new_transaction(lp_account.id(), transaction_request)
-        //         .await?;
-
-        //     println!("All of liq pool's notes consumed successfully.");
-        //     break;
-        // } else {
-        //     println!(
-        //         "Currently, liq pool has {} consumable notes. Waiting...",
-        //         list_of_note_ids.len()
-        //     );
-        //     tokio::time::sleep(Duration::from_secs(3)).await;
-        // }
+                    println!("All of liq pool's DEPOSIT notes consumed successfully.");
+                    break;
+                } else {
+                    println!(
+                        "Currently, pool contract has {} consumable DEPOSIT notes. Waiting...",
+                        number_of_notes
+                    );
+                    tokio::time::sleep(Duration::from_secs(3)).await;
+                }
+            }
+            Err(e) => {
+                println!("Error in listening for zoro swap notes: {}", e);
+            }
+        };
     }
 
     println!("\n[STEP 3] Set initial states of the two_pools_account");
@@ -428,4 +438,32 @@ async fn main() -> Result<()> {
     );
 
     Ok(())
+}
+
+async fn fetch_new_notes_by_tag(
+    client: &mut MidenClient,
+    pool_id_tag: &NoteTag,
+) -> Result<Vec<Note>> {
+    client.sync_state().await?;
+    let all_notes = client.get_input_notes(NoteFilter::Committed).await?;
+    let notes: Vec<Note> = all_notes
+        .iter()
+        .filter_map(|n| {
+            if let Some(metadata) = n.metadata() {
+                if metadata.tag().eq(pool_id_tag) {
+                    let note = Note::new(
+                        n.assets().clone(),
+                        *metadata,
+                        n.details().recipient().clone(),
+                    );
+                    Some(note)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .collect();
+    Ok(notes)
 }
