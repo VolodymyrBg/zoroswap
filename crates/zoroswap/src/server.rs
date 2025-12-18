@@ -105,32 +105,32 @@ async fn pool_info(State(state): State<AppState>) -> impl IntoResponse {
 }
 
 #[derive(Clone, Debug, Serialize)]
-struct PoolStateInfo {
+struct PoolStateInfoResponse {
     pool_account_id: String,
     faucet_account_id: String,
-    reserve: U256,
-    reserve_with_slippage: U256,
-    total_liabilities: U256,
-    swap_fee: U256,
-    backstop_fee: U256,
-    protocol_fee: U256,
+    reserve: String,
+    reserve_with_slippage: String,
+    total_liabilities: String,
+    swap_fee: String,
+    backstop_fee: String,
+    protocol_fee: String,
 }
 
 async fn pool_states(State(state): State<AppState>) -> impl IntoResponse {
     let config = state.amm_state.config();
     let network_id = config.network_id;
     let pools = state.amm_state.liquidity_pools();
-    let pool_states: Vec<PoolStateInfo> = pools
+    let pool_states: Vec<PoolStateInfoResponse> = pools
         .iter()
-        .map(|s| PoolStateInfo {
+        .map(|s| PoolStateInfoResponse {
             pool_account_id: s.pool_account_id.to_bech32(network_id.clone()),
             faucet_account_id: s.faucet_account_id.to_bech32(network_id.clone()),
-            reserve: s.balances.reserve,
-            reserve_with_slippage: s.balances.reserve_with_slippage,
-            total_liabilities: s.balances.total_liabilities,
-            swap_fee: s.settings.swap_fee,
-            backstop_fee: s.settings.backstop_fee,
-            protocol_fee: s.settings.protocol_fee,
+            reserve: s.balances.reserve.to_string(),
+            reserve_with_slippage: s.balances.reserve_with_slippage.to_string(),
+            total_liabilities: s.balances.total_liabilities.to_string(),
+            swap_fee: s.settings.swap_fee.to_string(),
+            backstop_fee: s.settings.backstop_fee.to_string(),
+            protocol_fee: s.settings.protocol_fee.to_string(),
         })
         .collect();
     let response = serde_json::json!({
