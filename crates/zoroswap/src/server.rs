@@ -64,7 +64,8 @@ pub fn create_router(state: AppState) -> Router {
     Router::new()
         .route("/health", get(health_check))
         .route("/pools/info", get(pool_info))
-        .route("/pools/state", get(pool_states))
+        .route("/pools/balance", get(pool_balances))
+        .route("/pools/settings", get(pool_settings))
         .route("/orders/submit", post(submit_order))
         .route("/faucets/mint", post(mint_faucet))
         .route("/stats", get(get_stats))
@@ -105,29 +106,52 @@ async fn pool_info(State(state): State<AppState>) -> impl IntoResponse {
 }
 
 #[derive(Clone, Debug, Serialize)]
-struct PoolStateInfoResponse {
-    pool_account_id: String,
-    faucet_account_id: String,
+struct PoolBalancesResponse {
+    faucet_id: String,
     reserve: String,
     reserve_with_slippage: String,
     total_liabilities: String,
+}
+#[derive(Clone, Debug, Serialize)]
+struct PoolSettingsResponse {
+    faucet_id: String,
     swap_fee: String,
     backstop_fee: String,
     protocol_fee: String,
 }
 
-async fn pool_states(State(state): State<AppState>) -> impl IntoResponse {
+async fn pool_balances(State(state): State<AppState>) -> impl IntoResponse {
     let config = state.amm_state.config();
     let network_id = config.network_id;
     let pools = state.amm_state.liquidity_pools();
-    let pool_states: Vec<PoolStateInfoResponse> = pools
+    let pool_states: Vec<PoolBalancesResponse> = pools
         .iter()
-        .map(|s| PoolStateInfoResponse {
-            pool_account_id: s.pool_account_id.to_bech32(network_id.clone()),
-            faucet_account_id: s.faucet_account_id.to_bech32(network_id.clone()),
+        .map(|s| PoolBalancesResponse {
+            faucet_id: s.faucet_account_id.to_bech32(network_id.clone()),
             reserve: s.balances.reserve.to_string(),
             reserve_with_slippage: s.balances.reserve_with_slippage.to_string(),
             total_liabilities: s.balances.total_liabilities.to_string(),
+        })
+        .collect();
+    let response = serde_json::json!({
+        "data": pool_states
+    });
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        header::CACHE_CONTROL,
+        HeaderValue::from_static("max-age=15, must-revalidate"),
+    );
+    (headers, Json(response))
+}
+
+async fn pool_settings(State(state): State<AppState>) -> impl IntoResponse {
+    let config = state.amm_state.config();
+    let network_id = config.network_id;
+    let pools = state.amm_state.liquidity_pools();
+    let pool_states: Vec<PoolSettingsResponse> = pools
+        .iter()
+        .map(|s| PoolSettingsResponse {
+            faucet_id: s.faucet_account_id.to_bech32(network_id.clone()),
             swap_fee: s.settings.swap_fee.to_string(),
             backstop_fee: s.settings.backstop_fee.to_string(),
             protocol_fee: s.settings.protocol_fee.to_string(),

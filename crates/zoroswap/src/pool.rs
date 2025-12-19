@@ -1,6 +1,7 @@
 use alloy::primitives::{I256, U256};
 use anyhow::{Result, anyhow};
 use miden_client::account::AccountId;
+use serde::Serialize;
 use std::{collections::HashMap, str::FromStr};
 #[cfg(feature = "zoro-curve-local")]
 use zoro_curve_local::ZoroCurve as ConfiguredCurve;
@@ -9,7 +10,7 @@ use zoro_miden_client::MidenClient;
 use zoro_primitives::dummy_curve::DummyCurve as ConfiguredCurve;
 use zoro_primitives::traits::Curve;
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, Serialize)]
 pub struct PoolBalances {
     pub reserve: U256,
     pub reserve_with_slippage: U256,

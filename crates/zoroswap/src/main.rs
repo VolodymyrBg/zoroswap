@@ -186,6 +186,8 @@ async fn run_main_tokio(
     println!("📡 Available endpoints:");
     println!("  GET  /health                    - Health check");
     println!("  GET  /pools/info                - Pool AccountId & liq. pools info");
+    println!("  GET  /pools/balance             - Pool balances");
+    println!("  GET  /pools/settings            - Pool fee settings");
     println!("  GET  /stats                     - Runtime statistics");
     println!("  POST /orders/submit             - Submit a new order");
     println!("  POST /faucets/mint              - Mint from a faucet");
