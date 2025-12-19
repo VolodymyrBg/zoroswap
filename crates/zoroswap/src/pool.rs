@@ -11,10 +11,10 @@ use std::{collections::HashMap, fs, path::Path, str::FromStr};
 
 use tracing::info;
 
-#[cfg(feature = "nabla-curve")]
-use zoro_curve::NablaCurve as ConfiguredCurve;
+#[cfg(feature = "zoro-curve-local")]
+use zoro_curve_local::ZoroCurve as ConfiguredCurve;
 use zoro_miden_client::{MidenClient, create_library};
-#[cfg(not(feature = "nabla-curve"))]
+#[cfg(not(feature = "zoro-curve-local"))]
 use zoro_primitives::dummy_curve::DummyCurve as ConfiguredCurve;
 use zoro_primitives::traits::Curve;
 
