@@ -9,8 +9,6 @@ use miden_client::{
 use miden_lib::transaction::TransactionKernel;
 use std::{collections::HashMap, fs, path::Path, str::FromStr};
 
-use tracing::info;
-
 #[cfg(feature = "zoro-curve-local")]
 use zoro_curve_local::ZoroCurve as ConfiguredCurve;
 use zoro_miden_client::{MidenClient, create_library};

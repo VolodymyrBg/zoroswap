@@ -3,8 +3,8 @@ use miden_client::{
     ClientError, Felt, ScriptBuilder, Word,
     account::AccountId,
     note::{
-        Note, NoteAssets, NoteError, NoteExecutionHint, NoteMetadata, NoteRecipient, NoteScript,
-        NoteTag, NoteType,
+        Note, NoteAssets, NoteError, NoteExecutionHint, NoteMetadata, NoteRecipient, NoteTag,
+        NoteType,
     },
 };
 use miden_lib::{note::utils::build_p2id_recipient, transaction::TransactionKernel};

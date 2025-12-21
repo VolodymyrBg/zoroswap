@@ -7,8 +7,7 @@ use miden_client::store::TransactionFilter;
 use miden_client::{
     Client, ClientError, Felt, Word,
     account::{
-        Account, AccountBuilder, AccountId, AccountStorageMode, AccountType, Address,
-        AddressInterface, NetworkId,
+        Account, AccountBuilder, AccountId, AccountStorageMode, AccountType, Address, NetworkId,
     },
     asset::{Asset, FungibleAsset, TokenSymbol},
     auth::AuthSecretKey,

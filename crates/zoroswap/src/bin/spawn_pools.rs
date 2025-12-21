@@ -1,9 +1,7 @@
-use alloy::primitives::U256;
 use anyhow::{Result, anyhow};
 use chrono::Utc;
 use clap::Parser;
 use dotenv::dotenv;
-use miden_assembly::LinkLibraryKind;
 use miden_client::{
     Felt, Word,
     account::{AccountBuilder, AccountStorageMode, AccountType, StorageMap, StorageSlot},
@@ -11,7 +9,7 @@ use miden_client::{
     auth::AuthSecretKey,
     crypto::FeltRng,
     keystore::FilesystemKeyStore,
-    note::{Note, NoteId, NoteTag, NoteType},
+    note::{Note, NoteTag, NoteType},
     store::NoteFilter,
     transaction::{OutputNote, TransactionRequestBuilder},
 };
@@ -21,14 +19,11 @@ use miden_lib::{
 };
 use miden_objects::{account::AccountComponent, assembly::Assembler};
 use rand::RngCore;
-use std::{collections::HashSet, fs, path::Path, time::Duration};
+use std::{fs, path::Path, time::Duration};
 use tracing::info;
-use zoro_miden_client::{
-    MidenClient, create_basic_account, create_library, instantiate_simple_client,
-};
+use zoro_miden_client::{MidenClient, create_basic_account, instantiate_simple_client};
 use zoroswap::{
     Config, create_deposit_note, fetch_pool_state_from_chain, fetch_vault_for_account_from_chain,
-    print_transaction_info,
 };
 
 #[derive(Parser, Debug)]
@@ -239,13 +234,9 @@ async fn main() -> Result<()> {
         .build()?;
 
     println!("+++++Pool contract procedures");
-    pool_contract
-        .code()
-        .procedures()
-        .into_iter()
-        .for_each(|proc| {
-            println!("+++++proc root: {:?} ", proc.mast_root().to_hex());
-        });
+    pool_contract.code().procedures().iter().for_each(|proc| {
+        println!("+++++proc root: {:?} ", proc.mast_root().to_hex());
+    });
     println!(
         "pool contract commitment hash: {:?}",
         pool_contract.commitment().to_hex()
@@ -401,7 +392,7 @@ async fn main() -> Result<()> {
                         "Found consumable DEPOSIT notes for pool contract account. Consuming them now..."
                     );
 
-                    let in_amount: u64 = amount * 10u64.pow(8 as u32);
+                    let in_amount: u64 = amount * 10u64.pow(8);
                     let args: Word = [
                         Felt::new(in_amount),
                         Felt::new(in_amount),
@@ -413,9 +404,7 @@ async fn main() -> Result<()> {
                         .unauthenticated_input_notes(
                             valid_notes
                                 .iter()
-                                .map(|deposit_note| {
-                                    (deposit_note.clone().clone(), Some(args.clone()))
-                                })
+                                .map(|deposit_note| ((*deposit_note).clone(), Some(args)))
                                 .collect::<Vec<_>>(),
                         )
                         .build()
