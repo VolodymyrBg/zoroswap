@@ -189,7 +189,9 @@ async fn run_main_tokio(
     println!("  GET  /pools/balance             - Pool balances");
     println!("  GET  /pools/settings            - Pool fee settings");
     println!("  GET  /stats                     - Runtime statistics");
-    println!("  POST /orders/submit             - Submit a new order");
+    println!("  POST /orders/submit             - Submit a new swap order");
+    println!("  POST /deposit/submit            - Submit a new deposit");
+    println!("  POST /withdraw/submit           - Submit a new withdrawal");
     println!("  POST /faucets/mint              - Mint from a faucet");
     println!("  POST /orders/submit             - Submit a new order");
     println!("🌐 Server address: {}", server_url);
