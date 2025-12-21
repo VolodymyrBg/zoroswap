@@ -221,8 +221,6 @@ proc.execute_WITHDRAW
 end
 
 begin
-    debug.stack.4
-
     exec.store_args_to_memory
 
     exec.store_inputs_to_memory
