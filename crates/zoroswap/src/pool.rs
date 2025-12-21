@@ -414,6 +414,46 @@ pub fn get_curve_amount_out(
     Ok((amount_out, new_pool_balances_base, new_pool_balances_quote))
 }
 
+pub fn get_deposit_lp_amount_out(
+    pool: &PoolState,
+    deposit_amount: U256,
+    old_total_supply: U256,
+    asset_decimals: U256,
+) -> Result<(U256, PoolBalances)> {
+    // Cache to save some sloads
+    let old_total_liabilities = pool.balances.total_liabilities;
+    let old_reserve = pool.balances.reserve;
+    let old_reserve_with_slippage = pool.balances.reserve_with_slippage;
+
+    let curve = ConfiguredCurve::new(U256::from(pool.settings.beta), U256::from(pool.settings.c));
+
+    let new_reserve_with_slippage = old_reserve_with_slippage + deposit_amount;
+    let mut reserve_increment = curve.inverse_diagonal(
+        old_reserve,
+        old_total_liabilities,
+        new_reserve_with_slippage,
+        asset_decimals,
+    );
+
+    // fix potential numerical imprecission
+    if reserve_increment < deposit_amount {
+        reserve_increment = deposit_amount;
+    }
+    let new_lp_amount = if old_total_liabilities > 0 {
+        reserve_increment * old_total_supply / old_total_liabilities
+    } else {
+        reserve_increment
+    };
+
+    let new_pool_balances = PoolBalances {
+        reserve: old_reserve + reserve_increment,
+        reserve_with_slippage: new_reserve_with_slippage,
+        total_liabilities: old_total_liabilities + reserve_increment,
+    };
+
+    Ok((new_lp_amount, new_pool_balances))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
