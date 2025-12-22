@@ -3,6 +3,7 @@ pub mod common;
 pub mod config;
 pub mod faucet;
 pub mod note_serialization;
+pub mod notes_listener;
 pub mod oracle_sse;
 pub mod order;
 pub mod pool;
