@@ -3,25 +3,29 @@ use crate::{
     oracle_sse::{PriceData, PriceMetadata},
     order::Order,
     pool::{PoolBalances, PoolState},
+    websocket::{EventBroadcaster, PoolStateEvent},
 };
 use alloy::primitives::U256;
 use anyhow::{Result, anyhow};
+use chrono::Utc;
 use dashmap::DashMap;
 use miden_client::{account::AccountId, note::Note};
 use miden_lib::account::faucets::BasicFungibleFaucet;
 use std::sync::Arc;
 use tracing::{error, info};
 use uuid::Uuid;
-use zoro_miden_client::{MidenClient, instantiate_simple_client};
+use zoro_miden_client::MidenClient;
 
 pub struct AmmState {
     open_orders: DashMap<Uuid, Order>,
     closed_orders: DashMap<Uuid, Order>,
     notes: DashMap<Uuid, Note>,
+    note_ids: DashMap<Uuid, String>,
     liquidity_pools: DashMap<AccountId, PoolState>,
     oracle_prices: DashMap<AccountId, PriceData>,
     faucet_metadata: DashMap<AccountId, BasicFungibleFaucet>,
     config: Arc<Config>,
+    broadcaster: Option<Arc<EventBroadcaster>>,
 }
 
 impl AmmState {
@@ -30,11 +34,17 @@ impl AmmState {
             open_orders: DashMap::new(),
             closed_orders: DashMap::new(),
             notes: DashMap::new(),
+            note_ids: DashMap::new(),
             liquidity_pools: DashMap::new(),
             config: Arc::new(config),
             oracle_prices: DashMap::new(),
             faucet_metadata: DashMap::new(),
+            broadcaster: None,
         }
+    }
+
+    pub fn set_broadcaster(&mut self, broadcaster: Arc<EventBroadcaster>) {
+        self.broadcaster = Some(broadcaster);
     }
 
     pub async fn init_liquidity_pool_states(&self, client: &mut MidenClient) -> Result<()> {
@@ -54,15 +64,9 @@ impl AmmState {
         Ok(())
     }
 
-    pub async fn init_faucet_metadata(&self) -> Result<()> {
-        let mut miden_client =
-            instantiate_simple_client(self.config.keystore_path, &self.config.miden_endpoint)
-                .await?;
+    pub async fn init_faucet_metadata(&self, client: &mut MidenClient) -> Result<()> {
         for liq_pool in self.config.liquidity_pools.iter() {
-            let _ = miden_client
-                .import_account_by_id(liq_pool.faucet_id)
-                .await?;
-            if let Some(acc) = miden_client.get_account(liq_pool.faucet_id).await? {
+            if let Some(acc) = client.get_account(liq_pool.faucet_id).await? {
                 let faucet: BasicFungibleFaucet = BasicFungibleFaucet::try_from(acc.account())?;
                 self.faucet_metadata.insert(liq_pool.faucet_id, faucet);
             }
@@ -70,13 +74,22 @@ impl AmmState {
         Ok(())
     }
 
-    pub fn add_order(&self, note: Note) -> Result<String> {
-        let note_id = note.id().to_hex();
+    pub fn add_order(&self, note: Note) -> Result<(String, Uuid, Order)> {
+        // Get hex and ensure single 0x prefix to match frontend note.id().toString() format
+        let hex = note.id().to_hex();
+        let note_id = if hex.starts_with("0x") { hex } else { format!("0x{}", hex) };
         let order = Order::from_note(&note)?;
         let order_id = order.id;
+        // Store note_id mapping before inserting note (note might be consumed later)
+        self.note_ids.insert(order_id, note_id.clone());
         self.notes.insert(order_id, note);
         self.open_orders.insert(order_id, order);
-        Ok(note_id)
+        Ok((note_id, order_id, order))
+    }
+
+    pub fn get_note_id(&self, order_id: &Uuid) -> Option<String> {
+        // Look up from stored note_ids map (notes might be consumed during execution)
+        self.note_ids.get(order_id).map(|id| id.clone())
     }
 
     pub fn get_open_orders(&self) -> Vec<Order> {
@@ -112,6 +125,15 @@ impl AmmState {
     pub fn update_pool_state(&self, pool_account_id: &AccountId, new_pool_balances: PoolBalances) {
         if let Some(mut liq_pool) = self.liquidity_pools.get_mut(pool_account_id) {
             liq_pool.update_state(new_pool_balances);
+
+            // Broadcast pool state update if broadcaster is set
+            if let Some(ref broadcaster) = self.broadcaster {
+                let _ = broadcaster.broadcast_pool_state(PoolStateEvent {
+                    faucet_id: pool_account_id.to_hex(),
+                    balances: new_pool_balances,
+                    timestamp: Utc::now().timestamp_millis() as u64,
+                });
+            }
         };
     }
 
