@@ -64,7 +64,7 @@ impl PoolState {
         let (new_pool_balances, new_pool_settings) =
             fetch_pool_state_from_chain(client, self.pool_account_id, index_in_pool).await?;
         let lp_total_supply =
-            fetch_initial_lp_max_supply_from_chain(client, self.pool_account_id, index_in_pool)
+            fetch_initial_lp_total_supply_from_chain(client, self.pool_account_id, index_in_pool)
                 .await?;
         self.balances = new_pool_balances;
         self.settings = new_pool_settings;
@@ -81,7 +81,7 @@ impl PoolState {
     }
 }
 
-pub async fn fetch_initial_lp_max_supply_from_chain(
+pub async fn fetch_initial_lp_total_supply_from_chain(
     client: &mut MidenClient,
     pool_account_id: AccountId,
     index_in_pool: u8,
@@ -99,9 +99,10 @@ pub async fn fetch_initial_lp_max_supply_from_chain(
         Felt::new(0),
     ];
     let mut asset_address = account_storage.get_map_item(9, asset_mapping_index.into())?;
-    asset_address.reverse();
-    let total_supply = account_storage.get_map_item(11, asset_address)?[3].as_int();
-    Ok(total_supply)
+
+    let total_supply = account_storage.get_map_item(11, asset_address)?;
+
+    Ok(total_supply[0].as_int())
 }
 
 pub async fn fetch_pool_state_from_chain(
@@ -499,6 +500,7 @@ mod tests {
             },
             pool_account_id: AccountId::from_hex("0x000000000000000000000000000000").unwrap(),
             faucet_account_id: AccountId::from_hex("0x000000000000000000000000000000").unwrap(),
+            lp_total_supply: parse_ether("1000").unwrap().to::<u64>(),
         };
         let quote_pool = base_pool;
         let result = get_curve_amount_out(
@@ -534,6 +536,7 @@ mod tests {
             },
             pool_account_id: AccountId::from_hex("0x000000000000000000000000000000").unwrap(),
             faucet_account_id: AccountId::from_hex("0x000000000000000000000000000000").unwrap(),
+            lp_total_supply: parse_ether("1000").unwrap().to::<u64>(),
         };
         let quote_pool = base_pool;
         let result = get_curve_amount_out(

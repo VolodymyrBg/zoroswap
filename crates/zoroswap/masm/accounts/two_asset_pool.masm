@@ -375,7 +375,6 @@ export.deposit
     exec.compute_deposit_shares
     # => [share_amount]
     mem_store.LP_SHARES_AMOUNT_ADDR
-    # @todo: factor out into proc.add_to_map_item
     push.0.0.0
     # => [SHARE_AMOUNT]
     padw
@@ -387,7 +386,7 @@ export.deposit
 
     # update total supply
     mem_load.LP_SHARES_AMOUNT_ADDR push.0.0.0
-    padw mem_loadw_be.DEPOSIT_ASSET_LOC
+    padw mem_loadw_be.DEPOSIT_KEY_LOC
     exec.get_lp_shares_total_supply_key
     # => [KEY, SHARE_AMOUNT]
     push.USER_DEPOSITS_MAPPING_SLOT
@@ -443,10 +442,11 @@ proc.add_to_map_item
     # => [old_value, slot, KEY, VALUE]
     movup.9 add
     # => [new_value, slot, KEY, 0,0,0]
-    movdn.9
+    movdn.8
     # => [ slot, KEY, 0,0,0, new_value]
     # => [ slot, KEY, NEW_VALUE]
     exec.native_account::set_map_item dropw dropw
+
 end
 
 #! Inputs: [slot, KEY, VALUE]
@@ -458,7 +458,7 @@ proc.sub_from_map_item
     # => [old_value, slot, KEY, VALUE]
     movup.9 sub
     # => [new_value, slot, KEY, 0,0,0]
-    movdn.9
+    movdn.8
     # => [ slot, KEY, 0,0,0, new_value]
     # => [ slot, KEY, NEW_VALUE]
     exec.native_account::set_map_item dropw dropw
