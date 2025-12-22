@@ -488,3 +488,27 @@ pub fn account_id_to_note_tag(account_id: AccountId) -> NoteTag {
     let address = Address::new(account_id);
     address.to_note_tag()
 }
+
+pub fn print_library_exports(masm_lib: &miden_assembly::Library) {
+    println!("+++++Masm lib exports:");
+    masm_lib.exports().for_each(|export| {
+        println!(
+            "Export: {:?} {:?} {:?}",
+            export.name.name,
+            masm_lib
+                .get_procedure_root_by_name(export.name.clone())
+                .unwrap(),
+            masm_lib
+                .get_procedure_root_by_name(export.name.clone())
+                .unwrap()
+                .to_hex()
+        );
+    });
+}
+
+pub fn print_contract_procedures(pool_contract: &Account) {
+    println!("+++++Pool contract procedures");
+    pool_contract.code().procedures().iter().for_each(|proc| {
+        println!("Proc root: {:?} ", proc.mast_root().to_hex());
+    });
+}
