@@ -12,7 +12,7 @@ use dashmap::DashMap;
 use miden_client::{account::AccountId, note::Note};
 use miden_lib::account::faucets::BasicFungibleFaucet;
 use std::sync::Arc;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 use uuid::Uuid;
 use zoro_miden_client::MidenClient;
 
@@ -25,11 +25,11 @@ pub struct AmmState {
     oracle_prices: DashMap<AccountId, PriceData>,
     faucet_metadata: DashMap<AccountId, BasicFungibleFaucet>,
     config: Arc<Config>,
-    broadcaster: Option<Arc<EventBroadcaster>>,
+    broadcaster: Arc<EventBroadcaster>,
 }
 
 impl AmmState {
-    pub async fn new(config: Config) -> Self {
+    pub async fn new(config: Config, broadcaster: Arc<EventBroadcaster>) -> Self {
         Self {
             open_orders: DashMap::new(),
             closed_orders: DashMap::new(),
@@ -39,12 +39,8 @@ impl AmmState {
             config: Arc::new(config),
             oracle_prices: DashMap::new(),
             faucet_metadata: DashMap::new(),
-            broadcaster: None,
+            broadcaster,
         }
-    }
-
-    pub fn set_broadcaster(&mut self, broadcaster: Arc<EventBroadcaster>) {
-        self.broadcaster = Some(broadcaster);
     }
 
     pub async fn init_liquidity_pool_states(&self, client: &mut MidenClient) -> Result<()> {
@@ -129,15 +125,13 @@ impl AmmState {
     pub fn update_pool_state(&self, pool_account_id: &AccountId, new_pool_balances: PoolBalances) {
         if let Some(mut liq_pool) = self.liquidity_pools.get_mut(pool_account_id) {
             liq_pool.update_state(new_pool_balances);
-
-            // Broadcast pool state update if broadcaster is set
-            if let Some(ref broadcaster) = self.broadcaster {
-                let _ = broadcaster.broadcast_pool_state(PoolStateEvent {
-                    faucet_id: pool_account_id.to_hex(),
-                    balances: new_pool_balances,
-                    timestamp: Utc::now().timestamp_millis() as u64,
-                });
-            }
+            if let Err(e) = self.broadcaster.broadcast_pool_state(PoolStateEvent {
+                faucet_id: pool_account_id.to_hex(),
+                balances: new_pool_balances,
+                timestamp: Utc::now().timestamp_millis() as u64,
+            }) {
+                warn!("Error sending broadcast: {e}")
+            };
         };
     }
 

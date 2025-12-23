@@ -90,9 +90,7 @@ fn main() {
         let connection_manager = Arc::new(ConnectionManager::with_broadcaster(event_broadcaster.clone()));
 
         // Create and initialize AMM state
-        let mut amm_state = AmmState::new(config).await;
-        amm_state.set_broadcaster(event_broadcaster.clone());
-        let amm_state = Arc::new(amm_state);
+        let amm_state = Arc::new(AmmState::new(config, event_broadcaster.clone()).await);
 
         info!("[INIT] Initializing faucet metadata");
         amm_state
