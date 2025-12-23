@@ -12,3 +12,5 @@ testing_store.sqlite3
 .DS_Store*
 store.sqlite3-wal
 store.sqlite3-shm
+testing_store.sqlite3-shm
+testing_store.sqlite3-wal

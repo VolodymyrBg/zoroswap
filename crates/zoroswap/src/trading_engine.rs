@@ -800,7 +800,7 @@ mod tests {
         // Create trading engine, call method
         let broadcaster = Arc::new(EventBroadcaster::new());
         let engine = TradingEngine::new("testing_store.sqlite3", state.clone(), broadcaster);
-        let result = engine.get_liq_pools_for_order(&state.liquidity_pools(), &order);
+        let result = engine.get_liq_pools_for_order(state.liquidity_pools(), &order);
 
         // Verify result
         assert!(result.is_ok(), "Unable to get liquidity pools");
