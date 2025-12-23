@@ -43,17 +43,24 @@ impl NotesListener {
         let mut failed_notes: HashSet<NoteId> = HashSet::new();
         let tick_interval = self.state.config().amm_tick_interval;
 
+        let mut tick_count = 0u64;
         loop {
+            tick_count += 1;
             // Sync state
             if let Err(e) = client.sync_state().await {
                 warn!("Error on sync in notes listener: {e}");
+            }
+
+            // Log every 10 ticks to show listener is alive
+            if tick_count % 10 == 1 {
+                debug!("Notes listener tick #{}, looking for tag: {}", tick_count, tag);
             }
 
             // Fetch notes and filter by tag
             match Self::get_notes_filtered(&mut client, NoteFilter::Committed, Some(tag)).await {
                 Ok(notes) => {
                     if !notes.is_empty() {
-                        debug!("Notes listener found {} notes with pool tag", notes.len());
+                        debug!("Notes listener found {} committed notes with pool tag", notes.len());
                     }
                     let valid_notes: Vec<&Note> = notes
                         .iter()
@@ -124,6 +131,19 @@ impl NotesListener {
         tag: Option<NoteTag>,
     ) -> Result<Vec<Note>, anyhow::Error> {
         let all_notes = client.get_input_notes(filter).await?;
+
+        if !all_notes.is_empty() {
+            debug!(
+                "get_notes_filtered: {} total notes before tag filter, looking for tag {:?}",
+                all_notes.len(),
+                tag
+            );
+            for n in &all_notes {
+                if let Some(metadata) = n.metadata() {
+                    debug!("  Note {} has tag {}", n.id().to_hex(), metadata.tag());
+                }
+            }
+        }
 
         let notes: Vec<Note> = all_notes
             .iter()
