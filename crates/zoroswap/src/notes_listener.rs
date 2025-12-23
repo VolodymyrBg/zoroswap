@@ -18,10 +18,7 @@ pub struct NotesListener {
 
 impl NotesListener {
     pub fn new(state: Arc<AmmState>, broadcaster: Arc<EventBroadcaster>) -> Self {
-        Self {
-            state,
-            broadcaster,
-        }
+        Self { state, broadcaster }
     }
 
     pub async fn start(&mut self) {

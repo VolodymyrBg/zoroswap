@@ -77,7 +77,11 @@ impl AmmState {
     pub fn add_order(&self, note: Note) -> Result<(String, Uuid, Order)> {
         // Get hex and ensure single 0x prefix to match frontend note.id().toString() format
         let hex = note.id().to_hex();
-        let note_id = if hex.starts_with("0x") { hex } else { format!("0x{}", hex) };
+        let note_id = if hex.starts_with("0x") {
+            hex
+        } else {
+            format!("0x{}", hex)
+        };
         let order = Order::from_note(&note)?;
         let order_id = order.id;
         // Store note_id mapping before inserting note (note might be consumed later)

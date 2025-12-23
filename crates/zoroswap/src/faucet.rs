@@ -2,9 +2,7 @@ use crate::{common::instantiate_client, config::Config};
 use anyhow::Result;
 use chrono::Utc;
 use miden_client::{
-    account::AccountId,
-    asset::FungibleAsset,
-    note::NoteType,
+    account::AccountId, asset::FungibleAsset, note::NoteType,
     transaction::TransactionRequestBuilder,
 };
 use std::collections::HashMap;
@@ -55,7 +53,10 @@ impl GuardedFaucet {
             );
             if can_mint {
                 // Import the recipient account first
-                if let Err(e) = client.import_account_by_id(mint_instruction.account_id).await {
+                if let Err(e) = client
+                    .import_account_by_id(mint_instruction.account_id)
+                    .await
+                {
                     warn!("Note: account import returned: {e}");
                 }
 

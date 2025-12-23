@@ -60,12 +60,11 @@ impl TradingEngine {
         let min_match_interval = Duration::from_millis(100); // Debounce
         let max_match_interval = Duration::from_millis(1000); // Max wait (event-driven)
 
-        let mut client = instantiate_client(
-            self.state.config(),
-            &self.store_path,
-        )
-        .await
-        .unwrap_or_else(|err| panic!("Failed to instantiate client in trading engine: {err:?}"));
+        let mut client = instantiate_client(self.state.config(), &self.store_path)
+            .await
+            .unwrap_or_else(|err| {
+                panic!("Failed to instantiate client in trading engine: {err:?}")
+            });
 
         info!(
             "Starting event-driven trading engine (min: {:?}, max: {:?})",
@@ -170,7 +169,10 @@ impl TradingEngine {
                             // Broadcast Executed status for successful swaps
                             for execution in &orders_to_execute {
                                 if let OrderExecution::Swap(details) = execution {
-                                    let note_id = self.state.get_note_id(&details.order.id).unwrap_or_default();
+                                    let note_id = self
+                                        .state
+                                        .get_note_id(&details.order.id)
+                                        .unwrap_or_default();
                                     let _ =
                                         self.broadcaster.broadcast_order_update(OrderUpdateEvent {
                                             order_id: details.order.id,

@@ -208,7 +208,10 @@ fn spawn_event_bridge_tasks(
             loop {
                 match rx.recv().await {
                     Ok(event) => {
-                        debug!("Received order update event in bridge: order_id={}, note_id={}, status={:?}", event.order_id, event.note_id, event.status);
+                        debug!(
+                            "Received order update event in bridge: order_id={}, note_id={}, status={:?}",
+                            event.order_id, event.note_id, event.status
+                        );
                         let message = ServerMessage::OrderUpdate {
                             order_id: event.order_id.to_string(),
                             note_id: event.note_id.clone(),
@@ -226,7 +229,7 @@ fn spawn_event_bridge_tasks(
                         // Also broadcast to specific order channel for clients subscribed to this order
                         conn_mgr.broadcast_to_channel(
                             &SubscriptionChannel::OrderUpdates {
-                                order_id: Some(event.order_id.to_string())
+                                order_id: Some(event.order_id.to_string()),
                             },
                             message,
                         );
@@ -274,7 +277,10 @@ fn spawn_event_bridge_tasks(
                         );
                     }
                     Err(RecvError::Lagged(skipped)) => {
-                        warn!("Oracle price updates bridge lagged, skipped {} events", skipped);
+                        warn!(
+                            "Oracle price updates bridge lagged, skipped {} events",
+                            skipped
+                        );
                     }
                     Err(RecvError::Closed) => {
                         error!("Oracle price updates broadcast channel closed");
@@ -315,7 +321,10 @@ fn spawn_event_bridge_tasks(
                         );
                     }
                     Err(RecvError::Lagged(skipped)) => {
-                        warn!("Pool state updates bridge lagged, skipped {} events", skipped);
+                        warn!(
+                            "Pool state updates bridge lagged, skipped {} events",
+                            skipped
+                        );
                     }
                     Err(RecvError::Closed) => {
                         error!("Pool state updates broadcast channel closed");
