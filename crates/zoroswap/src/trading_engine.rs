@@ -239,7 +239,6 @@ impl TradingEngine {
         }
     }
 
-    #[cfg_attr(test, allow(dead_code))]
     pub(crate) fn run_matching_cycle(&self) -> Result<Vec<OrderExecution>> {
         let pools = self.state.liquidity_pools().clone();
         let mut orders = self.state.flush_open_orders();
