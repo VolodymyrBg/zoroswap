@@ -141,6 +141,16 @@ impl TradingEngine {
         *last_match = Instant::now();
         drop(last_match);
 
+        // Check if oracle prices are fresh (max 2 seconds old)
+        const MAX_PRICE_AGE_SECS: u64 = 2;
+        if let Some(stale_age) = self.state.oldest_stale_price(MAX_PRICE_AGE_SECS) {
+            warn!(
+                "Skipping matching cycle: oracle price is {}s old (max {}s)",
+                stale_age, MAX_PRICE_AGE_SECS
+            );
+            return;
+        }
+
         // Run existing matching logic
         match self.run_matching_cycle() {
             Ok(orders_to_execute) => {
@@ -542,7 +552,8 @@ mod tests {
         };
 
         // Create AMM state and populate it
-        let state = Arc::new(AmmState::new(config).await);
+        let broadcaster = Arc::new(EventBroadcaster::new());
+        let state = Arc::new(AmmState::new(config, broadcaster.clone()).await);
         state.faucet_metadata().insert(faucet_a_id, faucet_a);
         state.faucet_metadata().insert(faucet_b_id, faucet_b);
 
