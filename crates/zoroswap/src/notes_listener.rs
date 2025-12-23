@@ -76,13 +76,6 @@ impl NotesListener {
                         .collect();
 
                     for note in valid_notes.iter() {
-                        if let Err(e) = self
-                            .state
-                            .add_order(note.to_owned().clone(), OrderType::Swap)
-                        {
-                            error!("Error inserting new note: {e}");
-                            failed_notes.insert(note.id());
-                        };
                         let note_miden_id = note.id();
                         match self
                             .state
