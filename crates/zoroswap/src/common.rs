@@ -19,17 +19,17 @@ use zoro_miden_client::MidenClient;
 // Zoro-Specific Helper Functions
 // --------------------------------------------------------------------------
 
-/// Prints a clickable MidenScan URL for a transaction.
+/// Logs a clickable MidenScan URL for a transaction.
 pub fn print_transaction_info(tx: &miden_client::transaction::TransactionId) {
-    println!(
+    info!(
         "View transaction on MidenScan: https://testnet.midenscan.com/tx/{}",
         tx.to_hex()
     );
 }
 
-/// Prints a clickable MidenScan URL for a note.
+/// Logs a clickable MidenScan URL for a note.
 pub fn print_note_info(note_id: &miden_client::note::NoteId) {
-    println!(
+    info!(
         "View note on MidenScan: https://testnet.midenscan.com/note/{}",
         note_id.to_hex()
     );
