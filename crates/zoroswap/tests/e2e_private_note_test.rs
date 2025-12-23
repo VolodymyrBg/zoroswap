@@ -14,8 +14,8 @@ use std::str::FromStr;
 use url::Url;
 use zoro_miden_client::{create_basic_account, wait_for_consumable_notes, wait_for_note};
 use zoroswap::{
-    Config, create_zoroswap_note, fetch_vault_for_account_from_chain,
-    get_oracle_prices, instantiate_client, print_note_info, print_transaction_info, serialize_note,
+    Config, create_zoroswap_note, fetch_vault_for_account_from_chain, get_oracle_prices,
+    instantiate_client, print_note_info, print_transaction_info, serialize_note,
 };
 
 #[tokio::test]

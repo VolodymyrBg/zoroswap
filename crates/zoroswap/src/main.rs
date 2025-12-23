@@ -50,7 +50,9 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let filter = tracing_subscriber::EnvFilter::new("info,server=info,miden_client=warn,rusqlite_migration=warn,h2=warn,rustls=warn,hyper=warn");
+    let filter = tracing_subscriber::EnvFilter::new(
+        "info,server=info,miden_client=warn,rusqlite_migration=warn,h2=warn,rustls=warn,hyper=warn",
+    );
     tracing_subscriber::fmt().with_env_filter(filter).init();
     dotenv().ok();
     let runtime = tokio::runtime::Runtime::new()

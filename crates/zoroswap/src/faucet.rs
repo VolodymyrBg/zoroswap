@@ -45,10 +45,16 @@ impl GuardedFaucet {
                 }
                 Err(e) => {
                     if attempt < 5 {
-                        tracing::warn!("Faucet client creation attempt {}/5 failed: {e}, retrying...", attempt);
-                        tokio::time::sleep(std::time::Duration::from_millis(500 * attempt as u64)).await;
+                        tracing::warn!(
+                            "Faucet client creation attempt {}/5 failed: {e}, retrying...",
+                            attempt
+                        );
+                        tokio::time::sleep(std::time::Duration::from_millis(500 * attempt as u64))
+                            .await;
                     } else {
-                        return Err(anyhow::anyhow!("Failed to create faucet client after 5 attempts: {e}"));
+                        return Err(anyhow::anyhow!(
+                            "Failed to create faucet client after 5 attempts: {e}"
+                        ));
                     }
                 }
             }

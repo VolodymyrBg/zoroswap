@@ -70,10 +70,15 @@ impl TradingEngine {
                 }
                 Err(e) => {
                     if attempt < 5 {
-                        warn!("Trading engine client creation attempt {}/5 failed: {e}, retrying...", attempt);
+                        warn!(
+                            "Trading engine client creation attempt {}/5 failed: {e}, retrying...",
+                            attempt
+                        );
                         tokio::time::sleep(Duration::from_millis(500 * attempt as u64)).await;
                     } else {
-                        panic!("Failed to instantiate client in trading engine after 5 attempts: {e}");
+                        panic!(
+                            "Failed to instantiate client in trading engine after 5 attempts: {e}"
+                        );
                     }
                 }
             }
