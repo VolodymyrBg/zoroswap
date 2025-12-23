@@ -61,11 +61,20 @@ pub enum ServerMessage {
 #[serde(tag = "channel")]
 pub enum SubscriptionChannel {
     #[serde(rename = "order_updates")]
-    OrderUpdates { order_id: Option<String> },
+    OrderUpdates {
+        #[serde(default)]
+        order_id: Option<String>,
+    },
     #[serde(rename = "pool_state")]
-    PoolState { faucet_id: Option<String> },
+    PoolState {
+        #[serde(default)]
+        faucet_id: Option<String>,
+    },
     #[serde(rename = "oracle_prices")]
-    OraclePrices { oracle_id: Option<String> },
+    OraclePrices {
+        #[serde(default)]
+        oracle_id: Option<String>,
+    },
     #[serde(rename = "stats")]
     Stats,
 }

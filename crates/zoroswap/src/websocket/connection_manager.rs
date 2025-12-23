@@ -237,10 +237,15 @@ impl ConnectionManager {
             let broadcaster = broadcaster.clone();
             let conn_mgr = self.clone();
             tokio::spawn(async move {
+                debug!("Order updates forwarding task started");
                 let mut rx = broadcaster.subscribe_order_updates();
                 loop {
                     match rx.recv().await {
                         Ok(event) => {
+                            debug!(
+                                "Forwarding order update: order_id={}, note_id={}, status={:?}",
+                                event.order_id, event.note_id, event.status
+                            );
                             let message = ServerMessage::OrderUpdate {
                                 order_id: event.order_id.to_string(),
                                 note_id: event.note_id.clone(),
