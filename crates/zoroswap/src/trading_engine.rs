@@ -17,6 +17,7 @@ use miden_client::{
     transaction::TransactionRequestBuilder,
 };
 use miden_objects::note::NoteDetails;
+use rand::seq::SliceRandom;
 use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
@@ -240,7 +241,11 @@ impl TradingEngine {
 
     fn run_matching_cycle(&self) -> Result<Vec<OrderExecution>> {
         let pools = self.state.liquidity_pools().clone();
-        let orders = self.state.flush_open_orders();
+        let mut orders = self.state.flush_open_orders();
+
+        // MEV protection: randomize order processing sequence
+        orders.shuffle(&mut rand::rng());
+
         let mut order_executions = Vec::new();
         let now = Utc::now();
         for order in orders {
