@@ -22,6 +22,7 @@ use server::{AppState, create_router};
 use std::{sync::Arc, thread};
 use tokio::{runtime::Builder, sync::mpsc::Sender};
 use tracing::{error, info};
+use tracing_subscriber::EnvFilter;
 use trading_engine::TradingEngine;
 use zoro_miden_client::delete_client_store;
 
@@ -48,8 +49,10 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
+    let filter_layer = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new("info,zoro=debug,miden-client=debug"));
     tracing_subscriber::fmt()
-        .with_env_filter("info,zoro=debug,miden-client=debug")
+        .with_env_filter(filter_layer)
         .init();
     dotenv().ok();
     let runtime = tokio::runtime::Runtime::new()

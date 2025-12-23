@@ -102,11 +102,14 @@ impl Order {
         }
         let note_inputs: &[Felt] = note.inputs().values();
         debug!("Note inputs: {:?}", note_inputs);
-
+        debug!("confirmation");
         let vals = note.inputs().values();
+        debug!("vals: {vals:?}");
         let asset_in = asset_in.unwrap_fungible();
+        debug!("asset_in: {asset_in:?}");
         let min_lp_out: u64 = vals[1].into();
         let asset_out = FungibleAsset::new(asset_in.faucet_id(), min_lp_out)?;
+        debug!("Asset out: {:?}", asset_in);
 
         let deadline: u64 = vals[2].into();
         let p2id_tag: u64 = vals[3].into();
