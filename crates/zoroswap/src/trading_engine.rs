@@ -119,7 +119,7 @@ impl TradingEngine {
                 result = price_rx.recv() => {
                     match result {
                         Ok(_price_event) => {
-                            // Price update - trigger match
+                            // Price update: trigger match
                             self.run_matching_if_ready(min_match_interval, &mut client).await;
                         }
                         Err(RecvError::Lagged(skipped)) => {
