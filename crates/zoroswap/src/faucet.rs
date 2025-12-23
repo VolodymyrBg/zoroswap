@@ -45,7 +45,7 @@ impl GuardedFaucet {
                 }
                 Err(e) => {
                     if attempt < 5 {
-                        tracing::warn!(
+                        warn!(
                             "Faucet client creation attempt {}/5 failed: {e}, retrying...",
                             attempt
                         );

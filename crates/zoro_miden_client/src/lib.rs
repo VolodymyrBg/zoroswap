@@ -31,7 +31,7 @@ use rand::RngCore;
 use rand::rngs::StdRng;
 use std::{sync::Arc, time::Duration};
 use tokio::time::sleep;
-use tracing::info;
+use tracing::{debug, info, trace, warn};
 
 // --------------------------------------------------------------------------
 // Type Aliases
@@ -110,29 +110,29 @@ pub async fn get_note_by_tag(
     tag: NoteTag,
     target_note_id: NoteId,
 ) -> Result<()> {
-    tracing::debug!("Getting note by tag: {:?}", tag);
-    tracing::debug!("Note ID: {:?}", target_note_id);
+    debug!("Getting note by tag: {:?}", tag);
+    debug!("Note ID: {:?}", target_note_id);
     loop {
         // Sync the state and add the tag
         client.sync_state().await?;
         client.add_note_tag(tag).await?;
 
-        tracing::trace!(
+        trace!(
             "All input notes: {:?}",
             client.get_input_notes(NoteFilter::All).await?
         );
-        tracing::trace!(
+        trace!(
             "All output notes: {:?}",
             client.get_output_notes(NoteFilter::All).await?
         );
         // Fetch notes
         let notes = client.get_consumable_notes(None).await?;
-        tracing::trace!("Notes len: {:?}", notes.len());
+        trace!("Notes len: {:?}", notes.len());
         // Check if any note matches the target_note_id
         let found = notes.iter().any(|(note, _)| note.id() == target_note_id);
 
         if found {
-            tracing::debug!("Found the note with ID: {:?}", target_note_id);
+            debug!("Found the note with ID: {:?}", target_note_id);
             break;
         }
         tokio::time::sleep(Duration::from_millis(1000)).await;
@@ -176,12 +176,12 @@ pub fn create_library(
 pub async fn delete_client_store(store_path: &str) {
     if tokio::fs::metadata(store_path).await.is_ok() {
         if let Err(e) = tokio::fs::remove_file(store_path).await {
-            tracing::warn!("Failed to remove {}: {}", store_path, e);
+            warn!("Failed to remove {}: {}", store_path, e);
         } else {
             info!("Cleared sqlite store: {}", store_path);
         }
     } else {
-        tracing::debug!("Store not found: {}", store_path);
+        debug!("Store not found: {}", store_path);
     }
 }
 
@@ -288,7 +288,7 @@ pub async fn setup_accounts_and_faucets(
     info!("Note received.");
 
     client.sync_state().await?;
-    tracing::debug!("Client sync succeeded.");
+    debug!("Client sync succeeded.");
 
     // ---------------------------------------------------------------------
     // 5)  Consume notes so the tokens live in the public vaults
@@ -299,14 +299,14 @@ pub async fn setup_accounts_and_faucets(
                 .authenticated_input_notes([(note.id(), None)])
                 .build()
                 .unwrap_or_else(|err| panic!("Failed to build consume request: {err:?}"));
-            tracing::debug!("Built consume_req.");
+            debug!("Built consume_req.");
             let _tx_id = client
                 .submit_new_transaction(account.id(), consume_req)
                 .await?;
         }
     }
 
-    tracing::debug!("Client sync succeeded.");
+    debug!("Client sync succeeded.");
     client.sync_state().await?;
 
     info!("Final client sync succeeded.");
@@ -331,7 +331,7 @@ pub async fn wait_for_notes(
         if notes.len() >= expected {
             break;
         }
-        tracing::debug!(
+        debug!(
             "{} consumable notes found for account {}. Waiting...",
             notes.len(),
             account.id().to_hex()
@@ -432,7 +432,7 @@ pub async fn wait_for_note(
             info!("Note found {}", expected.id().to_hex());
             break;
         }
-        tracing::debug!("Note {} not found. Waiting...", expected.id().to_hex());
+        debug!("Note {} not found. Waiting...", expected.id().to_hex());
         sleep(Duration::from_secs(3)).await;
     }
     Ok(())
@@ -456,7 +456,7 @@ pub async fn wait_for_consumable_notes(
         if !notes.is_empty() {
             return Ok(notes);
         }
-        tracing::debug!(
+        debug!(
             "Consumable notes for account {:?} ({}) not found. Waiting...",
             account_id,
             account_id.to_hex()

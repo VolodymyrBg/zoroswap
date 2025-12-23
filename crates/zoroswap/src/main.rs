@@ -22,7 +22,7 @@ use oracle_sse::OracleSSEClient;
 use server::{AppState, create_router};
 use std::{sync::Arc, thread};
 use tokio::{runtime::Builder, sync::mpsc::Sender};
-use tracing::{error, info};
+use tracing::{error, info, warn};
 use trading_engine::TradingEngine;
 use websocket::{ConnectionManager, EventBroadcaster};
 use zoro_miden_client::delete_client_store;
@@ -66,7 +66,7 @@ fn main() {
         // This must be done before any clients are created
         if let Err(e) = enable_wal_mode(&args.store_path) {
             // Non-fatal: WAL mode is an optimization, not a requirement
-            tracing::warn!("Failed to enable WAL mode: {e}");
+            warn!("Failed to enable WAL mode: {e}");
         }
 
         let config = Config::from_config_file(
