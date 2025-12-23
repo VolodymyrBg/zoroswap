@@ -48,7 +48,7 @@ impl Order {
 
         let note_inputs: &[Felt] = note.inputs().values();
 
-        //info!("Note inputs: {:?}", note_inputs);
+        debug!("Note inputs: {:?}", note_inputs);
 
         let requested: &[Felt] = note_inputs
             .get(..4)
