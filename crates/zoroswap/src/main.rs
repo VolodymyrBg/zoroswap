@@ -50,9 +50,8 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    tracing_subscriber::fmt()
-        .with_env_filter("info,zoro=debug,miden-client=info")
-        .init();
+    let filter = tracing_subscriber::EnvFilter::new("info,server=debug,miden_client=warn,rusqlite_migration=warn,h2=warn,rustls=warn,hyper=warn");
+    tracing_subscriber::fmt().with_env_filter(filter).init();
     dotenv().ok();
     let runtime = tokio::runtime::Runtime::new()
         .unwrap_or_else(|err| panic!("Failed to create tokio runtime: {err:?}"));
