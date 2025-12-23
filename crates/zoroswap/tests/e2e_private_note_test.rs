@@ -8,21 +8,20 @@ use miden_client::{
     asset::FungibleAsset,
     crypto::FeltRng,
     keystore::FilesystemKeyStore,
-    note::{Note, NoteTag, NoteType},
+    note::{NoteTag, NoteType},
     transaction::{OutputNote, TransactionRequestBuilder},
 };
 use rand::rngs::StdRng;
 use std::{str::FromStr, time::Duration};
 use url::Url;
 use zoro_miden_client::{
-    MidenClient, create_basic_account, fetch_new_notes_by_tag, wait_for_consumable_notes,
-    wait_for_note,
+    MidenClient, create_basic_account, wait_for_consumable_notes, wait_for_note,
 };
 use zoroswap::{
-    Config, ZoroStorageSettings, config::LiquidityPoolConfig, create_deposit_note,
-    create_withdraw_note, create_zoroswap_note, fetch_lp_total_supply_from_chain,
-    fetch_pool_state_from_chain, fetch_vault_for_account_from_chain, get_oracle_prices,
-    instantiate_client, print_note_info, print_transaction_info, serialize_note,
+    Config, config::LiquidityPoolConfig, create_deposit_note, create_withdraw_note,
+    create_zoroswap_note, fetch_lp_total_supply_from_chain, fetch_pool_state_from_chain,
+    fetch_vault_for_account_from_chain, get_oracle_prices, instantiate_client, print_note_info,
+    print_transaction_info, serialize_note,
 };
 
 struct Accounts {
@@ -51,12 +50,9 @@ async fn set_up() -> Result<(
         config.liquidity_pools.len() > 1,
         "Less than 2 liquidity pools configured"
     );
-    let mut client = instantiate_client(
-        &config,
-        ZoroStorageSettings::trading_storage("../../testing_store.sqlite3".to_string()),
-    )
-    .await
-    .unwrap();
+    let mut client = instantiate_client(config.clone(), "../../testing_store.sqlite3")
+        .await
+        .unwrap();
     let endpoint = config.miden_endpoint.clone();
     let keystore = FilesystemKeyStore::new(config.keystore_path.into()).unwrap();
     let sync_summary = client.sync_state().await.unwrap();

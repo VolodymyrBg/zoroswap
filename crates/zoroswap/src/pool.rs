@@ -18,7 +18,7 @@ use zoro_miden_client::{MidenClient, create_library};
 use zoro_primitives::dummy_curve::DummyCurve as ConfiguredCurve;
 use zoro_primitives::traits::Curve;
 
-#[derive(Clone, Debug, Copy, serde::Serialize)]
+#[derive(Clone, Debug, Copy, Serialize, Eq, PartialEq)]
 pub struct PoolBalances {
     #[serde(serialize_with = "serialize_u256")]
     pub reserve: U256,
@@ -108,10 +108,8 @@ pub async fn fetch_lp_total_supply_from_chain(
         Felt::new(0),
         Felt::new(0),
     ];
-    let mut asset_address = account_storage.get_map_item(9, asset_mapping_index.into())?;
-
+    let asset_address = account_storage.get_map_item(9, asset_mapping_index.into())?;
     let total_supply = account_storage.get_map_item(11, asset_address)?;
-
     Ok(total_supply[0].as_int())
 }
 
