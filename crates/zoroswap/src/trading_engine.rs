@@ -176,10 +176,11 @@ impl TradingEngine {
 
         // Run existing matching logic
         match self.run_matching_cycle() {
-            Ok(orders_to_execute) => {
-                if !orders_to_execute.executions.is_empty() {
+            Ok(matching_cycle) => {
+                let executions = matching_cycle.executions;
+                if !executions.is_empty() {
                     // Broadcast order status updates before execution
-                    for execution in &orders_to_execute.executions {
+                    for execution in &executions {
                         let (order_id, status) = match execution {
                             OrderExecution::Swap(details) => {
                                 (details.order.id, OrderStatus::Matching)
@@ -224,39 +225,47 @@ impl TradingEngine {
                     }
 
                     // Execute swaps and broadcast success
-                    match self
-                        .execute_orders(orders_to_execute.executions.clone(), client)
-                        .await
-                    {
+                    match self.execute_orders(executions.clone(), client).await {
                         Ok(_) => {
+                            for (faucet_id, pool_state) in matching_cycle.new_pool_states {
+                                self.state
+                                    .update_pool_state(&faucet_id, pool_state.balances);
+                            }
+
                             // Broadcast Executed status for successful swaps
-                            for execution in &orders_to_execute.executions {
-                                if let OrderExecution::Swap(details) = execution {
-                                    let note_id = self
-                                        .state
-                                        .get_note_id(&details.order.id)
-                                        .unwrap_or_default();
-                                    let _ =
-                                        self.broadcaster.broadcast_order_update(OrderUpdateEvent {
-                                            order_id: details.order.id,
-                                            note_id,
-                                            status: OrderStatus::Executed,
-                                            details: OrderUpdateDetails {
-                                                amount_in: details.order.asset_in.amount(),
-                                                amount_out: Some(details.amount_out),
-                                                asset_in_faucet: details
-                                                    .order
-                                                    .asset_in
-                                                    .faucet_id()
-                                                    .to_hex(),
-                                                asset_out_faucet: details
-                                                    .order
-                                                    .asset_out
-                                                    .faucet_id()
-                                                    .to_hex(),
+                            for execution in &executions {
+                                match &execution {
+                                    &OrderExecution::Swap(details)
+                                    | &OrderExecution::Deposit(details)
+                                    | &OrderExecution::Withdraw(details) => {
+                                        let note_id = self
+                                            .state
+                                            .get_note_id(&details.order.id)
+                                            .unwrap_or_default();
+                                        let _ = self.broadcaster.broadcast_order_update(
+                                            OrderUpdateEvent {
+                                                order_id: details.order.id,
+                                                note_id,
+                                                status: OrderStatus::Executed,
+                                                details: OrderUpdateDetails {
+                                                    amount_in: details.order.asset_in.amount(),
+                                                    amount_out: Some(details.amount_out),
+                                                    asset_in_faucet: details
+                                                        .order
+                                                        .asset_in
+                                                        .faucet_id()
+                                                        .to_hex(),
+                                                    asset_out_faucet: details
+                                                        .order
+                                                        .asset_out
+                                                        .faucet_id()
+                                                        .to_hex(),
+                                                },
+                                                timestamp: Utc::now().timestamp_millis() as u64,
                                             },
-                                            timestamp: Utc::now().timestamp_millis() as u64,
-                                        });
+                                        );
+                                    }
+                                    _ => {}
                                 }
                             }
                         }
