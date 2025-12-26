@@ -359,7 +359,7 @@ impl TradingEngine {
                             note,
                             order,
                             amount_out: order.asset_in.amount(),
-                            in_pool_balances: base_pool_state.balances,
+                            in_pool_balances: new_pool_balance,
                             out_pool_balances: quote_pool_state.balances,
                         }));
                     } else {
@@ -401,7 +401,7 @@ impl TradingEngine {
                             note,
                             order,
                             amount_out,
-                            in_pool_balances: base_pool_state.balances,
+                            in_pool_balances: new_pool_balance,
                             out_pool_balances: quote_pool_state.balances,
                         }));
                     } else {
@@ -555,12 +555,39 @@ impl TradingEngine {
                                 .to::<u64>(),
                         ),
                     ]));
+                    println!(
+                        "-----------------------------------&&&&&&&&&&&&&&&&&&&&&& details.args: {:?}",
+                        details.args
+                    );
                     NoteExecutionDetails::Payout(details)
+                    // NoteExecutionDetails::ConsumeWithArgs((
+                    //     execution_details.note,
+                    //     Word::from(&[
+                    //         Felt::new(execution_details.amount_out),
+                    //         Felt::new(
+                    //             execution_details
+                    //                 .in_pool_balances
+                    //                 .reserve_with_slippage
+                    //                 .to::<u64>(),
+                    //         ),
+                    //         Felt::new(execution_details.in_pool_balances.reserve.to::<u64>()),
+                    //         Felt::new(
+                    //             execution_details
+                    //                 .in_pool_balances
+                    //                 .total_liabilities
+                    //                 .to::<u64>(),
+                    //         ),
+                    //     ]),
+                    // ))
                 }
             };
 
             match note_execution_details {
                 NoteExecutionDetails::Payout(payout) => {
+                    println!(
+                        "-----------------------------------&&&&&&&&&&&&&&&&&&&&&& Payout: {:?}",
+                        payout.args
+                    );
                     expected_future_notes.push((payout.details, payout.tag));
                     expected_output_recipients.push(payout.recipient);
                     input_notes.push((payout.note, payout.args));
@@ -576,14 +603,15 @@ impl TradingEngine {
             info!("Expected future note P2ID id: {:?}", note.0.id());
             for asset in note.0.assets().iter_fungible() {
                 info!(
-                    "Expected future note P2ID asset with faucet_id: {} {}{}: {:?}",
-                    asset.faucet_id().to_bech32(network_id.clone()),
-                    asset.faucet_id().prefix(),
+                    "Expected future note P2ID asset with faucet_id: {:?}, {:?}, {:?}",
+                    // asset.faucet_id().to_bech32(network_id.clone()),
+                    asset.faucet_id().prefix().as_felt(),
                     asset.faucet_id().suffix(),
                     asset.amount()
                 );
             }
         }
+
         println!(
             "----------------------------------------------------------------------input_notes: {:?}",
             input_notes
@@ -653,8 +681,10 @@ impl TradingEngine {
         ];
 
         info!(
-            "Calculated {asset_out:?} asset_out for recipient {} with serial number {:?}",
+            "Calculated {asset_out:?} asset_out for recipient {} {} {} with serial number {:?}",
             user_account_id.to_bech32(self.network_id.clone()),
+            user_account_id.prefix().as_felt(),
+            user_account_id.suffix(),
             p2id_serial_num
         );
 

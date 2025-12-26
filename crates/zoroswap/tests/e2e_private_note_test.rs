@@ -233,7 +233,7 @@ async fn e2e_private_deposit_withdraw_test() -> Result<()> {
         asset_out_word[3],
         Felt::new(0),
         Felt::new(amount_to_withdraw), // min_lp_amount_out
-        Felt::new(0),                  //Felt::new(deadline),           // deadline
+        Felt::new(deadline),           // deadline
         p2id_tag.into(),               // p2id tag
         Felt::new(0),
         Felt::new(0),
@@ -273,7 +273,7 @@ async fn e2e_private_deposit_withdraw_test() -> Result<()> {
     )
     .await?;
 
-    tokio::time::sleep(Duration::from_secs(10)).await;
+    tokio::time::sleep(Duration::from_secs(25)).await;
 
     let total_lp_supply_after_withdraw: u64 =
         fetch_lp_total_supply_from_chain(&mut client, config.pool_account_id, 0).await?;

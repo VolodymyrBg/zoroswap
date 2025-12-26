@@ -17,6 +17,7 @@ use miden_lib::{
     account::{auth::AuthRpoFalcon512, wallets::BasicWallet},
     transaction::TransactionKernel,
 };
+
 use miden_objects::{account::AccountComponent, assembly::Assembler};
 use rand::RngCore;
 use std::{fs, path::Path, time::Duration};
