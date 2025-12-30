@@ -339,9 +339,10 @@ async fn e2e_private_note() -> Result<()> {
     println!("\n\t[STEP 4] Create user zoroswap note\n");
     let amount_in = 3 * 10u64.pow(pool0.decimals as u32 - 2); // 0.03
     let max_slippage = 0.005; // 0.5 %
-    let min_amount_out =
-        ((pool0_price as f64) / (pool1_price as f64)) * (amount_in as f64) * (1.0 - max_slippage);
-    let min_amount_out = 0 as u64;
+    let min_amount_out = (((pool0_price as f64) / (pool1_price as f64))
+        * (amount_in as f64)
+        * (1.0 - max_slippage)) as u64;
+    //let min_amount_out = 0 as u64;
     let asset_in = FungibleAsset::new(pool0.faucet_id, amount_in)?;
     let asset_out = FungibleAsset::new(pool1.faucet_id, min_amount_out)?;
     let requested_asset_word: Word = asset_out.into();
