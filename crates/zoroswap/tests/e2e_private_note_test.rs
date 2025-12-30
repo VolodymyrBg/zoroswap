@@ -147,7 +147,8 @@ async fn e2e_private_deposit_withdraw_test() -> Result<()> {
     let pool = pools[0];
 
     let lp_total_supply_before =
-        fetch_lp_total_supply_from_chain(&mut client, config.pool_account_id, 0).await?;
+        fetch_lp_total_supply_from_chain(&mut client, config.pool_account_id, pool.faucet_id)
+            .await?;
 
     let amount_in = 4;
     println!("\n\t[STEP 1] Create DEPOSIT note\n");
@@ -205,7 +206,8 @@ async fn e2e_private_deposit_withdraw_test() -> Result<()> {
     tokio::time::sleep(Duration::from_secs(10)).await;
 
     let lp_total_supply_after =
-        fetch_lp_total_supply_from_chain(&mut client, config.pool_account_id, 0).await?;
+        fetch_lp_total_supply_from_chain(&mut client, config.pool_account_id, pool.faucet_id)
+            .await?;
     println!("lp_total_supply_after: {lp_total_supply_after}");
     println!("lp_total_supply_before: {lp_total_supply_before}");
     println!("min_lp_amount_out: {min_lp_amount_out}");
@@ -276,7 +278,8 @@ async fn e2e_private_deposit_withdraw_test() -> Result<()> {
     tokio::time::sleep(Duration::from_secs(25)).await;
 
     let total_lp_supply_after_withdraw: u64 =
-        fetch_lp_total_supply_from_chain(&mut client, config.pool_account_id, 0).await?;
+        fetch_lp_total_supply_from_chain(&mut client, config.pool_account_id, pool.faucet_id)
+            .await?;
 
     println!(
         "LP total supply before withdraw: {lp_total_supply_after}, after withdraw: {total_lp_supply_after_withdraw}"
@@ -298,9 +301,9 @@ async fn e2e_private_note() -> Result<()> {
     let pool1 = pools[1];
 
     let (balances_pool_0, _) =
-        fetch_pool_state_from_chain(&mut client, config.pool_account_id, 0).await?;
+        fetch_pool_state_from_chain(&mut client, config.pool_account_id, pool0.faucet_id).await?;
     let (balances_pool_1, _) =
-        fetch_pool_state_from_chain(&mut client, config.pool_account_id, 1).await?;
+        fetch_pool_state_from_chain(&mut client, config.pool_account_id, pool1.faucet_id).await?;
     let vault = fetch_vault_for_account_from_chain(&mut client, config.pool_account_id).await?;
     println!("balances for liq pool 0: {balances_pool_0:?}");
     println!("balances for liq pool 1: {balances_pool_1:?}");
@@ -426,9 +429,9 @@ async fn e2e_private_note() -> Result<()> {
     // ---------------------------------------------------------------------------------
     println!("\n\t[STEP 7] Confirm pool states updated accordingly\n");
     let (new_balances_pool_0, _) =
-        fetch_pool_state_from_chain(&mut client, config.pool_account_id, 0).await?;
+        fetch_pool_state_from_chain(&mut client, config.pool_account_id, pool0.faucet_id).await?;
     let (new_balances_pool_1, _) =
-        fetch_pool_state_from_chain(&mut client, config.pool_account_id, 1).await?;
+        fetch_pool_state_from_chain(&mut client, config.pool_account_id, pool1.faucet_id).await?;
     let new_vault = fetch_vault_for_account_from_chain(&mut client, config.pool_account_id).await?;
     println!("previous balances for liq pool 0: {balances_pool_0:?}");
     println!("previouse balances for liq pool 1: {balances_pool_1:?}");
