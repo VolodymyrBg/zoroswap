@@ -536,7 +536,6 @@ impl TradingEngine {
         let mut expected_future_notes = Vec::new();
         let mut expected_output_recipients = Vec::new();
         let mut advice_map = AdviceMap::default();
-        let advice_key = [Felt::new(6000), Felt::new(0), Felt::new(0), Felt::new(0)];
 
         for execution in executions {
             let note_execution_details = match execution {
@@ -621,6 +620,8 @@ impl TradingEngine {
                         "-----------------------------------&&&&&&&&&&&&&&&&&&&&&& Payout: {:?}",
                         payout.args
                     );
+                    let advice_key = payout.note.serial_num();
+
                     expected_future_notes.push((payout.details, payout.tag));
                     expected_output_recipients.push(payout.recipient);
                     input_notes.push((payout.note, payout.args));
@@ -745,14 +746,14 @@ impl TradingEngine {
         );
 
         let advice_map_value = vec![
-            Felt::new(asset_out.unwrap_fungible().amount()),
-            Felt::new(in_pool_balances.reserve_with_slippage.to::<u64>()),
-            Felt::new(in_pool_balances.reserve.to::<u64>()),
             Felt::new(in_pool_balances.total_liabilities.to::<u64>()),
-            Felt::new(0),
-            Felt::new(out_pool_balances.reserve_with_slippage.to::<u64>()),
-            Felt::new(out_pool_balances.reserve.to::<u64>()),
+            Felt::new(in_pool_balances.reserve.to::<u64>()),
+            Felt::new(in_pool_balances.reserve_with_slippage.to::<u64>()),
+            Felt::new(asset_out.unwrap_fungible().amount()),
             Felt::new(out_pool_balances.total_liabilities.to::<u64>()),
+            Felt::new(out_pool_balances.reserve.to::<u64>()),
+            Felt::new(out_pool_balances.reserve_with_slippage.to::<u64>()),
+            Felt::new(0),
         ];
 
         Ok(PayoutDetails {
