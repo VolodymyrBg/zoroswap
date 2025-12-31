@@ -44,10 +44,18 @@ async fn e2e_public_note() -> Result<()> {
     let sync_summary = client.sync_state().await?;
     println!("\nLatest block: {}", sync_summary.block_num);
 
-    let (balances_pool_0, _) =
-        fetch_pool_state_from_chain(&mut client, config.pool_account_id, 0).await?;
-    let (balances_pool_1, _) =
-        fetch_pool_state_from_chain(&mut client, config.pool_account_id, 1).await?;
+    let (balances_pool_0, _) = fetch_pool_state_from_chain(
+        &mut client,
+        config.pool_account_id,
+        config.liquidity_pools[0].faucet_id,
+    )
+    .await?;
+    let (balances_pool_1, _) = fetch_pool_state_from_chain(
+        &mut client,
+        config.pool_account_id,
+        config.liquidity_pools[1].faucet_id,
+    )
+    .await?;
     let vault = fetch_vault_for_account_from_chain(&mut client, config.pool_account_id).await?;
     println!("balances for liq pool 0: {balances_pool_0:?}");
     println!("balances for liq pool 1: {balances_pool_1:?}");
@@ -246,10 +254,18 @@ async fn e2e_public_note() -> Result<()> {
 
     // ---------------------------------------------------------------------------------
     println!("\n\t[STEP 6] Confirm pool states updated accordingly\n");
-    let (new_balances_pool_0, _) =
-        fetch_pool_state_from_chain(&mut client, config.pool_account_id, 0).await?;
-    let (new_balances_pool_1, _) =
-        fetch_pool_state_from_chain(&mut client, config.pool_account_id, 1).await?;
+    let (new_balances_pool_0, _) = fetch_pool_state_from_chain(
+        &mut client,
+        config.pool_account_id,
+        config.liquidity_pools[0].faucet_id,
+    )
+    .await?;
+    let (new_balances_pool_1, _) = fetch_pool_state_from_chain(
+        &mut client,
+        config.pool_account_id,
+        config.liquidity_pools[1].faucet_id,
+    )
+    .await?;
     let new_vault = fetch_vault_for_account_from_chain(&mut client, config.pool_account_id).await?;
     println!("previous balances for liq pool 0: {balances_pool_0:?}");
     println!("previouse balances for liq pool 1: {balances_pool_1:?}");
