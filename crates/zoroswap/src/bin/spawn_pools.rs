@@ -94,7 +94,7 @@ async fn main() -> Result<()> {
     println!("\n[STEP 1] Create two_pools_account");
 
     // Load the MASM file for the counter contract
-    let pool_reader_path = format!("{}/accounts/two_asset_pool.masm", config.masm_path);
+    let pool_reader_path = format!("{}/accounts/zoropool.masm", config.masm_path);
     let pool_reader_path = Path::new(&pool_reader_path);
     let pool_code = fs::read_to_string(pool_reader_path)
         .unwrap_or_else(|err| panic!("unable to read from {pool_reader_path:?}: {err}"));

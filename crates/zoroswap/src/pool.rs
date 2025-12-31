@@ -209,7 +209,7 @@ pub fn create_set_pool_state_tx(
     let script_path = format!("{masm_path}/scripts/set_pool{pool_num}_state.masm");
     let script_code = fs::read_to_string(Path::new(&script_path))
         .map_err(|e| anyhow!("Error opening {script_path}: {e}"))?;
-    let pool_account_path = format!("{masm_path}/accounts/two_asset_pool.masm");
+    let pool_account_path = format!("{masm_path}/accounts/zoropool.masm");
     let pool_code = fs::read_to_string(Path::new(&pool_account_path))
         .map_err(|e| anyhow!("Error opening {pool_account_path}: {e}"))?;
     let assembler: Assembler = TransactionKernel::assembler().with_debug_mode(true);

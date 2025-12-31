@@ -169,14 +169,14 @@ pub fn create_zoroswap_note(
         .collect();
     let note_code = fs::read_to_string(&path)
         .unwrap_or_else(|err| panic!("Error reading {}: {}", path.display(), err));
-    let pool_code_path: PathBuf = [manifest_dir, "masm", "accounts", "two_asset_pool.masm"]
+    let pool_code_path: PathBuf = [manifest_dir, "masm", "accounts", "zoropool.masm"]
         .iter()
         .collect();
     let pool_code = fs::read_to_string(&pool_code_path)
         .unwrap_or_else(|err| panic!("Error reading {}: {}", pool_code_path.display(), err));
 
     let pool_component_lib =
-        create_library(assembler.clone(), "zoro::two_asset_pool", &pool_code).unwrap();
+        create_library(assembler.clone(), "zoro::zoropool", &pool_code).unwrap();
 
     let note_script = ScriptBuilder::new(true)
         .with_dynamically_linked_library(&pool_component_lib)
@@ -225,14 +225,14 @@ pub fn create_deposit_note(
         .collect();
     let note_code = fs::read_to_string(&path)
         .unwrap_or_else(|err| panic!("Error reading {}: {}", path.display(), err));
-    let pool_code_path: PathBuf = [manifest_dir, "masm", "accounts", "two_asset_pool.masm"]
+    let pool_code_path: PathBuf = [manifest_dir, "masm", "accounts", "zoropool.masm"]
         .iter()
         .collect();
     let pool_code = fs::read_to_string(&pool_code_path)
         .unwrap_or_else(|err| panic!("Error reading {}: {}", pool_code_path.display(), err));
 
     let pool_component_lib =
-        create_library(assembler.clone(), "zoro::two_asset_pool", &pool_code).unwrap();
+        create_library(assembler.clone(), "zoro::zoropool", &pool_code).unwrap();
 
     let note_script = ScriptBuilder::new(true)
         .with_dynamically_linked_library(&pool_component_lib)
@@ -281,14 +281,14 @@ pub fn create_withdraw_note(
         .collect();
     let note_code = fs::read_to_string(&path)
         .unwrap_or_else(|err| panic!("Error reading {}: {}", path.display(), err));
-    let pool_code_path: PathBuf = [manifest_dir, "masm", "accounts", "two_asset_pool.masm"]
+    let pool_code_path: PathBuf = [manifest_dir, "masm", "accounts", "zoropool.masm"]
         .iter()
         .collect();
     let pool_code = fs::read_to_string(&pool_code_path)
         .unwrap_or_else(|err| panic!("Error reading {}: {}", pool_code_path.display(), err));
 
     let pool_component_lib =
-        create_library(assembler.clone(), "zoro::two_asset_pool", &pool_code).unwrap();
+        create_library(assembler.clone(), "zoro::zoropool", &pool_code).unwrap();
 
     let note_script = ScriptBuilder::new(true)
         .with_dynamically_linked_library(&pool_component_lib)
@@ -328,14 +328,14 @@ pub fn get_script_root_for_order_type(order_type: OrderType) -> Word {
     let path: PathBuf = [manifest_dir, "masm", "notes", script].iter().collect();
     let note_code = fs::read_to_string(&path)
         .unwrap_or_else(|err| panic!("Error reading {}: {}", path.display(), err));
-    let pool_code_path: PathBuf = [manifest_dir, "masm", "accounts", "two_asset_pool.masm"]
+    let pool_code_path: PathBuf = [manifest_dir, "masm", "accounts", "zoropool.masm"]
         .iter()
         .collect();
     let pool_code = fs::read_to_string(&pool_code_path)
         .unwrap_or_else(|err| panic!("Error reading {}: {}", pool_code_path.display(), err));
 
     let pool_component_lib =
-        create_library(assembler.clone(), "zoro::two_asset_pool", &pool_code).unwrap();
+        create_library(assembler.clone(), "zoro::zoropool", &pool_code).unwrap();
 
     let note_script = ScriptBuilder::new(true)
         .with_dynamically_linked_library(&pool_component_lib)
