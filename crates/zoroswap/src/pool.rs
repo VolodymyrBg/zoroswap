@@ -62,8 +62,9 @@ impl PoolState {
         }
     }
 
-    pub fn update_state(&mut self, new_balances: PoolBalances) -> AccountId {
+    pub fn update_state(&mut self, new_balances: PoolBalances, new_lp_total_supply: u64) -> AccountId {
         self.balances = new_balances;
+        self.lp_total_supply = new_lp_total_supply;
         self.faucet_account_id
     }
 
@@ -445,12 +446,13 @@ pub fn get_curve_amount_out(
     Ok((amount_out, new_pool_balances_base, new_pool_balances_quote))
 }
 
+/// Returns `(lp_amount_out, new_pool_balances, new_lp_total_supply)`.
 pub fn get_deposit_lp_amount_out(
     pool: &PoolState,
     deposit_amount: U256,
     old_total_supply: U256,
     asset_decimals: U256,
-) -> Result<(U256, PoolBalances)> {
+) -> Result<(U256, PoolBalances, u64)> {
     // Cache to save some sloads
     let old_total_liabilities = pool.balances.total_liabilities;
     let old_reserve = pool.balances.reserve;
@@ -482,15 +484,20 @@ pub fn get_deposit_lp_amount_out(
         total_liabilities: old_total_liabilities + reserve_increment,
     };
 
-    Ok((new_lp_amount, new_pool_balances))
+    let new_lp_total_supply: u64 = (old_total_supply + new_lp_amount)
+        .try_into()
+        .map_err(|e| anyhow!("LP total supply overflow, exceeds u64::MAX: {e:?}"))?;
+
+    Ok((new_lp_amount, new_pool_balances, new_lp_total_supply))
 }
 
+/// Returns `(payout_amount, new_pool_balances, new_lp_total_supply)`.
 pub fn get_withdraw_asset_amount_out(
     pool: &PoolState,
     withdraw_amount: U256,
     old_total_supply: U256,
     asset_decimals: U256,
-) -> Result<(U256, PoolBalances)> {
+) -> Result<(U256, PoolBalances, u64)> {
     // Cache to save some sloads
     let old_total_liabilities = pool.balances.total_liabilities;
     let old_reserve = pool.balances.reserve;
@@ -533,7 +540,12 @@ pub fn get_withdraw_asset_amount_out(
         total_liabilities: new_total_liabilities,
     };
 
-    Ok((payout_amount, new_pool_balances))
+    // withdraw_amount is the LP tokens being burned
+    let new_lp_total_supply: u64 = (old_total_supply - withdraw_amount)
+        .try_into()
+        .map_err(|e| anyhow!("LP total supply underflow or overflow during withdrawal: {e:?}"))?;
+
+    Ok((payout_amount, new_pool_balances, new_lp_total_supply))
 }
 #[cfg(test)]
 mod tests {
