@@ -1141,5 +1141,67 @@ mod tests {
             "Swaps should not change lp_total_supply"
         );
     }
+
+    /// Test that `get_deposit_lp_amount_out` returns correct `PoolState` with updated `lp_total_supply`.
+    #[test]
+    fn test_get_deposit_lp_amount_out_returns_correct_pool_state() {
+        use crate::pool::{get_deposit_lp_amount_out, PoolBalances, PoolState};
+
+        let initial_lp_supply: u64 = 1_000_000;
+        let initial_reserve = U256::from(10_000_000u64);
+        let asset_decimals = U256::from(6u64); // 6 decimals like USDC
+
+        let mut pool = PoolState::default();
+        pool.balances = PoolBalances {
+            reserve: initial_reserve,
+            reserve_with_slippage: initial_reserve,
+            total_liabilities: initial_reserve,
+        };
+        pool.lp_total_supply = initial_lp_supply;
+
+        // First deposit
+        let deposit_amount = U256::from(1_000_000u64);
+        let (lp_out_1, new_pool_state_1) = get_deposit_lp_amount_out(
+            &pool,
+            deposit_amount,
+            U256::from(pool.lp_total_supply),
+            asset_decimals,
+        );
+
+        assert!(lp_out_1 > U256::ZERO, "Should mint LP tokens");
+        assert!(
+            new_pool_state_1.lp_total_supply > initial_lp_supply,
+            "New pool state should have increased lp_total_supply"
+        );
+        assert_eq!(
+            new_pool_state_1.lp_total_supply,
+            U256::from(initial_lp_supply)
+                .saturating_add(lp_out_1)
+                .saturating_to::<u64>(),
+            "lp_total_supply should equal initial + minted"
+        );
+
+        // Second deposit should use updated lp_total_supply
+        let (lp_out_2, new_pool_state_2) = get_deposit_lp_amount_out(
+            &new_pool_state_1,
+            deposit_amount,
+            U256::from(new_pool_state_1.lp_total_supply),
+            asset_decimals,
+        );
+
+        assert!(lp_out_2 > U256::ZERO, "Should mint LP tokens for second deposit");
+        assert_eq!(
+            new_pool_state_2.lp_total_supply,
+            U256::from(new_pool_state_1.lp_total_supply)
+                .saturating_add(lp_out_2)
+                .saturating_to::<u64>(),
+            "Second deposit should build on first deposit's lp_total_supply"
+        );
+
+        // Verify cumulative effect
+        assert!(
+            new_pool_state_2.lp_total_supply > new_pool_state_1.lp_total_supply,
+            "Final lp_total_supply should be greater than after first deposit"
+        );
     }
 }
