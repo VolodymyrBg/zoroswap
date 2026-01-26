@@ -9,7 +9,7 @@ use miden_client::{
 use miden_lib::transaction::TransactionKernel;
 use serde::Serialize;
 use std::{collections::HashMap, fs, path::Path, str::FromStr};
-use tracing::info;
+use tracing::{debug, info};
 
 #[cfg(feature = "zoro-curve-local")]
 use zoro_curve_local::ZoroCurve as ConfiguredCurve;
@@ -301,7 +301,7 @@ pub fn get_curve_amount_out(
 
     // COMPUTE
     // ADJUST FOR IN TOKEN POOL IMBALANCE
-    println!(
+    debug!(
         "base pool reserve: {:?} base pool total liabilities: {:?} base pool reserve with slippage: {:?} amount in: {:?}",
         base_pool.balances.reserve,
         base_pool.balances.total_liabilities,
@@ -320,15 +320,15 @@ pub fn get_curve_amount_out(
         asset_decimals_in,
     );
 
-    println!(
+    debug!(
         "basePool reserve: {:?} effective_amount_in: {:?}",
         base_pool.balances.reserve, effective_amount_in
     );
-    println!(
+    debug!(
         "base pool reserve + effective_amount_in: {:?}",
         base_pool.balances.reserve + effective_amount_in
     );
-    println!(
+    debug!(
         "base pool total liabilities: {:?}",
         base_pool.balances.total_liabilities
     );
@@ -339,7 +339,7 @@ pub fn get_curve_amount_out(
     }
 
     // AMOUNT OUT BEFORE FEES AND OUT TOKEN POOL IMBALANCE
-    println!(
+    debug!(
         "asset_decimals_in: {:?} asset_decimals_out: {:?}, price: {:?}",
         asset_decimals_in, asset_decimals_out, price
     );
@@ -349,7 +349,7 @@ pub fn get_curve_amount_out(
         price_scaling_factor / U256::from(10).pow(asset_decimals_out - asset_decimals_in)
     };
 
-    println!(
+    debug!(
         "effective_amount_in: {:?} price: {:?} scaling_factor: {:?}",
         effective_amount_in, price, scaling_factor
     );
@@ -364,13 +364,8 @@ pub fn get_curve_amount_out(
     // COMPUTE ACTUAL LP FEE
     let reduced_reserve_out = quote_pool.balances.reserve - raw_amount_out + fee_amount;
 
-    println!(
-        "LP AMOUNT out
-        reduced_reserve_out {},
-        quote_pool.total_liabilities: {},
-        quote_pool.reserve_with_slippage : {},
-        asset_decimals_out: {},
-        ",
+    debug!(
+        "LP AMOUNT out reduced_reserve_out {}, quote_pool.total_liabilities: {}, quote_pool.reserve_with_slippage: {}, asset_decimals_out: {}",
         reduced_reserve_out,
         quote_pool.balances.total_liabilities,
         quote_pool.balances.reserve_with_slippage,
@@ -408,19 +403,14 @@ pub fn get_curve_amount_out(
     let amount_out =
         quote_pool.balances.reserve_with_slippage - reserve_with_slippage_after_amount_out;
 
-    // Debug logging (remove in production)
-    println!("Debug values:");
-    println!("  effective_amount_in: {}", effective_amount_in);
-    println!("  raw_amount_out: {}", raw_amount_out);
-    println!(
-        "  reserve_with_slippage_out: {}",
-        quote_pool.balances.reserve_with_slippage
+    debug!(
+        "effective_amount_in: {}, raw_amount_out: {}, reserve_with_slippage_out: {}, reserve_with_slippage_after_amount_out: {}, amount_out: {}",
+        effective_amount_in,
+        raw_amount_out,
+        quote_pool.balances.reserve_with_slippage,
+        reserve_with_slippage_after_amount_out,
+        amount_out
     );
-    println!(
-        "  reserve_with_slippage_after_amount_out: {}",
-        reserve_with_slippage_after_amount_out
-    );
-    println!("  amount_out: {}", amount_out);
 
     //     reserver_with_slippage1 = reserver_with_slippage0 + amount_in
     // reserver1 =  reserver0 + effective_amount_in
@@ -571,7 +561,7 @@ mod tests {
 
         assert!(result.is_ok());
         let amount_out = result.unwrap().0;
-        println!("final   amount_out: {}", amount_out);
+        println!("final amount_out: {}", amount_out);
         let expected_amount_out = U256::from(9994944708456040182u64);
         assert_eq!(amount_out, expected_amount_out);
     }
