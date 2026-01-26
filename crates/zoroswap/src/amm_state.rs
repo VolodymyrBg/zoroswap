@@ -131,7 +131,7 @@ impl AmmState {
 
     pub fn update_pool_state(&self, faucet_id: &AccountId, new_pool_state: PoolState) {
         if let Some(mut liq_pool) = self.liquidity_pools.get_mut(faucet_id) {
-            *liq_pool = new_pool_state;
+            liq_pool.update_state(new_pool_state.balances, new_pool_state.lp_total_supply);
             if let Err(e) = self.broadcaster.broadcast_pool_state(PoolStateEvent {
                 faucet_id: faucet_id.to_bech32(self.config.network_id.clone()),
                 balances: new_pool_state.balances,
