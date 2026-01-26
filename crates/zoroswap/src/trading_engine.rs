@@ -1102,13 +1102,13 @@ mod tests {
         );
 
         // Then: the returned pool state has lp_total_supply = initial + minted
-        assert!(lp_out > U256::ZERO, "should mint LP tokens");
+        assert!(lp_out > U256::ZERO, "must mint LP tokens");
         assert_eq!(
             new_pool_state.lp_total_supply,
             U256::from(initial_lp_supply)
                 .saturating_add(lp_out)
                 .saturating_to::<u64>(),
-            "returned pool state should have lp_total_supply = initial + minted"
+            "returned pool state must have lp_total_supply = initial + minted"
         );
     }
 
@@ -1144,7 +1144,7 @@ mod tests {
             asset_decimals,
         );
 
-        // Then: the final lp_total_supply reflects both deposits
+        // Then: the final `lp_total_supply` reflects both deposits
         let expected_final_supply = U256::from(initial_lp_supply)
             .saturating_add(lp_out_1)
             .saturating_add(lp_out_2)
@@ -1152,11 +1152,11 @@ mod tests {
 
         assert_eq!(
             pool_after_second.lp_total_supply, expected_final_supply,
-            "final lp_total_supply should equal initial + first deposit + second deposit"
+            "final lp_total_supply must equal initial + first deposit + second deposit"
         );
         assert!(
             pool_after_second.lp_total_supply > pool_after_first.lp_total_supply,
-            "second deposit should increase lp_total_supply beyond first deposit"
+            "second deposit must increase lp_total_supply beyond first deposit"
         );
     }
 }
