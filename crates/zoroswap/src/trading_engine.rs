@@ -481,11 +481,11 @@ impl TradingEngine {
                         pools
                             .get_mut(&order.asset_in.faucet_id())
                             .ok_or(anyhow!("Missing pool in state"))?
-                            .balances = new_base_pool_balance;
+                            .update_balances(new_base_pool_balance);
                         pools
                             .get_mut(&order.asset_out.faucet_id())
                             .ok_or(anyhow!("Missing pool in state"))?
-                            .balances = new_quote_pool_balance;
+                            .update_balances(new_quote_pool_balance);
                         let (_, note) = self.state.pluck_note(&order.id)?;
                         order_executions.push(OrderExecution::Swap(ExecutionDetails {
                             note,

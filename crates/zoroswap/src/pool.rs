@@ -68,6 +68,10 @@ impl PoolState {
         self.faucet_account_id
     }
 
+    pub fn update_balances(&mut self, new_balances: PoolBalances) {
+        self.balances = new_balances;
+    }
+
     pub async fn sync_from_chain(
         &mut self,
         client: &mut MidenClient,
