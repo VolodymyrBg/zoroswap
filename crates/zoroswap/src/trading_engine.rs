@@ -809,7 +809,7 @@ mod tests {
     use crate::{
         config::{Config, LiquidityPoolConfig},
         oracle_sse::PriceData,
-        pool::{PoolBalances, PoolState},
+        pool::{get_deposit_lp_amount_out, PoolBalances, PoolState},
         websocket::EventBroadcaster,
     };
     use chrono::Utc;
@@ -1078,8 +1078,6 @@ mod tests {
     /// Test that `update_state` updates `lp_total_supply` and `update_balances` preserves it.
     #[test]
     fn test_update_state_updates_lp_total_supply() {
-        use crate::pool::{PoolBalances, PoolState};
-
         // Given: a pool with initial LP supply and reserves
         let initial_lp_supply: u64 = 1_000_000;
         let initial_reserve = U256::from(10_000_000u64);
@@ -1111,8 +1109,6 @@ mod tests {
     /// Test that `update_balances` (used for swaps) does not change `lp_total_supply`.
     #[test]
     fn test_update_balances_preserves_lp_total_supply() {
-        use crate::pool::{PoolBalances, PoolState};
-
         // Given: a pool with existing LP supply
         let initial_lp_supply: u64 = 1_000_000;
         let initial_reserve = U256::from(10_000_000u64);
@@ -1144,8 +1140,6 @@ mod tests {
     /// `lp_total_supply`, enabling consecutive deposits to use accurate LP supply values.
     #[test]
     fn test_get_deposit_lp_amount_out_returns_updated_lp_total_supply() {
-        use crate::pool::{get_deposit_lp_amount_out, PoolBalances, PoolState};
-
         // Given: a pool with initial LP supply and reserves
         let initial_lp_supply: u64 = 1_000_000;
         let initial_reserve = U256::from(10_000_000u64);
@@ -1182,8 +1176,6 @@ mod tests {
     /// Test that consecutive deposits correctly accumulate `lp_total_supply`.
     #[test]
     fn test_consecutive_deposits_accumulate_lp_total_supply() {
-        use crate::pool::{get_deposit_lp_amount_out, PoolBalances, PoolState};
-
         // Given: a pool with initial LP supply
         let initial_lp_supply: u64 = 1_000_000;
         let initial_reserve = U256::from(10_000_000u64);
