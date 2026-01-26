@@ -248,7 +248,6 @@ impl TradingEngine {
                     // Execute swaps and broadcast success
                     match self.execute_orders(executions.clone(), client).await {
                         Ok(_) => {
-                            // Apply pool state updates only after successful execution
                             for (faucet_id, pool_state) in matching_cycle.new_pool_states {
                                 self.state.update_pool_state(&faucet_id, pool_state);
                             }
@@ -259,7 +258,6 @@ impl TradingEngine {
                                     &OrderExecution::Swap(details)
                                     | &OrderExecution::Deposit(details)
                                     | &OrderExecution::Withdraw(details) => {
-                                        let timestamp = Utc::now().timestamp_millis() as u64;
                                         let note_id = self
                                             .state
                                             .get_note_id(&details.order.id)
@@ -283,7 +281,7 @@ impl TradingEngine {
                                                         .faucet_id()
                                                         .to_hex(),
                                                 },
-                                                timestamp,
+                                                timestamp: Utc::now().timestamp_millis() as u64,
                                             },
                                         );
                                     }
@@ -803,7 +801,6 @@ impl TradingEngine {
             (*quote_pool_state, quote_pool_faucet.decimals()),
         ))
     }
-
 }
 
 #[cfg(test)]

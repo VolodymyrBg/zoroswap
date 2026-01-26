@@ -200,7 +200,7 @@ async fn mint_faucet(
         Ok(()) => Json(serde_json::json!({ "success": true })),
         Err(e) => {
             error!("Error processing mint: {e:?}");
-            Json(serde_json::json!({ "success": false, "message": format!("Error processing mint: {e:?}") }))
+            Json(serde_json::json!({ "success": false, "message": format!("Error minting: {e:?}") }))
         }
     };
     Ok(resp)

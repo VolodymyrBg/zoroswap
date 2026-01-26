@@ -490,7 +490,9 @@ pub fn get_deposit_lp_amount_out(
     let new_pool_state = PoolState {
         balances: new_pool_balances,
         lp_total_supply: new_lp_total_supply,
-        ..*pool
+        settings: pool.settings,
+        pool_account_id: pool.pool_account_id,
+        faucet_account_id: pool.faucet_account_id,
     };
 
     (new_lp_amount, new_pool_state)
@@ -553,7 +555,9 @@ pub fn get_withdraw_asset_amount_out(
     let new_pool_state = PoolState {
         balances: new_pool_balances,
         lp_total_supply: new_lp_total_supply,
-        ..*pool
+        settings: pool.settings,
+        pool_account_id: pool.pool_account_id,
+        faucet_account_id: pool.faucet_account_id,
     };
 
     (payout_amount, new_pool_state)
