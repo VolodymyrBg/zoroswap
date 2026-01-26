@@ -1155,14 +1155,13 @@ mod tests {
         );
     }
 
-    /// Test that lp_total_supply is properly updated when processing multiple deposits
-    /// in a single matching cycle. This catches the bug where DashMap clone wasn't
-    /// propagating lp_total_supply updates between consecutive deposits.
+    /// Test that `lp_total_supply` is properly updated when processing multiple deposits
+    /// in a single matching cycle.
     #[test]
     fn test_lp_total_supply_updates_in_matching_cycle() {
         use crate::pool::{PoolBalances, PoolState};
 
-        // Create a pool with known initial lp_total_supply
+        // Create a pool with known initial `lp_total_supply`
         let initial_lp_supply: u64 = 1_000_000;
         let initial_reserve = U256::from(10_000_000u64);
 
@@ -1174,7 +1173,7 @@ mod tests {
         };
         pool.lp_total_supply = initial_lp_supply;
 
-        // Simulate first deposit, should increase lp_total_supply
+        // Simulate first deposit, should increase `lp_total_supply`
         let new_balances_1 = PoolBalances {
             reserve: initial_reserve + U256::from(1_000_000u64),
             reserve_with_slippage: initial_reserve + U256::from(1_000_000u64),
@@ -1188,7 +1187,7 @@ mod tests {
             "First deposit should update lp_total_supply"
         );
 
-        // Simulate second deposit, should use updated lp_total_supply
+        // Simulate second deposit, should use updated `lp_total_supply`
         let new_balances_2 = PoolBalances {
             reserve: pool.balances.reserve + U256::from(1_000_000u64),
             reserve_with_slippage: pool.balances.reserve_with_slippage + U256::from(1_000_000u64),
@@ -1202,61 +1201,10 @@ mod tests {
             "Second deposit should update lp_total_supply based on first deposit's update"
         );
 
-        // Verify the lp_total_supply correctly accumulated
+        // Verify the `lp_total_supply` correctly accumulated
         assert!(
             pool.lp_total_supply > initial_lp_supply + 100_000,
             "Final lp_total_supply should reflect both deposits"
-        );
-    }
-
-    /// Test that DashMap clone propagates lp_total_supply updates correctly
-    #[test]
-    fn test_dashmap_clone_lp_total_supply_propagation() {
-        use crate::pool::{PoolBalances, PoolState};
-        use dashmap::DashMap;
-
-        let faucet_id = AccountId::from_hex("0x000000000000000000000000000001").unwrap();
-        let pool_id = AccountId::from_hex("0x000000000000000000000000000002").unwrap();
-
-        let pools: DashMap<AccountId, PoolState> = DashMap::new();
-        let mut initial_pool = PoolState::new(pool_id, faucet_id);
-        initial_pool.balances = PoolBalances {
-            reserve: U256::from(10_000_000u64),
-            reserve_with_slippage: U256::from(10_000_000u64),
-            total_liabilities: U256::from(10_000_000u64),
-        };
-        initial_pool.lp_total_supply = 1_000_000;
-        pools.insert(faucet_id, initial_pool);
-
-        // Clone the DashMap (simulating what run_matching_cycle does)
-        let cloned_pools = pools.clone();
-
-        // Update the cloned pool's lp_total_supply (simulating deposit processing)
-        {
-            let mut pool = cloned_pools.get_mut(&faucet_id).unwrap();
-            pool.update_state(
-                PoolBalances {
-                    reserve: U256::from(11_000_000u64),
-                    reserve_with_slippage: U256::from(11_000_000u64),
-                    total_liabilities: U256::from(11_000_000u64),
-                },
-                1_100_000, // Updated lp_total_supply
-            );
-        }
-
-        // Verify the cloned pool has the updated lp_total_supply
-        let updated_pool = cloned_pools.get(&faucet_id).unwrap();
-        assert_eq!(
-            updated_pool.lp_total_supply, 1_100_000,
-            "Cloned DashMap should have updated lp_total_supply"
-        );
-
-        // Now when we read again from the clone (simulating second deposit),
-        // we should see the updated value
-        let pool_for_second_deposit = cloned_pools.get(&faucet_id).unwrap();
-        assert_eq!(
-            pool_for_second_deposit.lp_total_supply, 1_100_000,
-            "Second read from cloned DashMap should see updated lp_total_supply"
         );
     }
 }

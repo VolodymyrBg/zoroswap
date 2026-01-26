@@ -540,13 +540,14 @@ pub fn get_withdraw_asset_amount_out(
         total_liabilities: new_total_liabilities,
     };
 
-    // withdraw_amount is the LP tokens being burned
+    // `withdraw_amount` is the LP tokens being burned
     let new_lp_total_supply: u64 = (old_total_supply - withdraw_amount)
         .try_into()
         .map_err(|e| anyhow!("LP total supply underflow or overflow during withdrawal: {e:?}"))?;
 
     Ok((payout_amount, new_pool_balances, new_lp_total_supply))
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
