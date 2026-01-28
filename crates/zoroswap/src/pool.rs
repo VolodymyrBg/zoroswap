@@ -62,9 +62,14 @@ impl PoolState {
         }
     }
 
-    pub fn update_state(&mut self, new_balances: PoolBalances) -> AccountId {
+    pub fn update_state(&mut self, new_balances: PoolBalances, new_lp_total_supply: u64) -> AccountId {
         self.balances = new_balances;
+        self.lp_total_supply = new_lp_total_supply;
         self.faucet_account_id
+    }
+
+    pub fn update_balances(&mut self, new_balances: PoolBalances) {
+        self.balances = new_balances;
     }
 
     pub async fn sync_from_chain(
@@ -445,12 +450,13 @@ pub fn get_curve_amount_out(
     Ok((amount_out, new_pool_balances_base, new_pool_balances_quote))
 }
 
+/// Returns `(lp_amount_out, new_pool_state)`.
 pub fn get_deposit_lp_amount_out(
     pool: &PoolState,
     deposit_amount: U256,
     old_total_supply: U256,
     asset_decimals: U256,
-) -> Result<(U256, PoolBalances)> {
+) -> (U256, PoolState) {
     // Cache to save some sloads
     let old_total_liabilities = pool.balances.total_liabilities;
     let old_reserve = pool.balances.reserve;
@@ -482,15 +488,28 @@ pub fn get_deposit_lp_amount_out(
         total_liabilities: old_total_liabilities + reserve_increment,
     };
 
-    Ok((new_lp_amount, new_pool_balances))
+    let new_lp_total_supply = old_total_supply
+        .saturating_add(new_lp_amount)
+        .saturating_to::<u64>();
+
+    let new_pool_state = PoolState {
+        balances: new_pool_balances,
+        lp_total_supply: new_lp_total_supply,
+        settings: pool.settings,
+        pool_account_id: pool.pool_account_id,
+        faucet_account_id: pool.faucet_account_id,
+    };
+
+    (new_lp_amount, new_pool_state)
 }
 
+/// Returns `(payout_amount, new_pool_state)`.
 pub fn get_withdraw_asset_amount_out(
     pool: &PoolState,
     withdraw_amount: U256,
     old_total_supply: U256,
     asset_decimals: U256,
-) -> Result<(U256, PoolBalances)> {
+) -> (U256, PoolState) {
     // Cache to save some sloads
     let old_total_liabilities = pool.balances.total_liabilities;
     let old_reserve = pool.balances.reserve;
@@ -533,8 +552,22 @@ pub fn get_withdraw_asset_amount_out(
         total_liabilities: new_total_liabilities,
     };
 
-    Ok((payout_amount, new_pool_balances))
+    // `withdraw_amount` is the LP tokens being redeemed
+    let new_lp_total_supply = old_total_supply
+        .saturating_sub(withdraw_amount)
+        .saturating_to::<u64>();
+
+    let new_pool_state = PoolState {
+        balances: new_pool_balances,
+        lp_total_supply: new_lp_total_supply,
+        settings: pool.settings,
+        pool_account_id: pool.pool_account_id,
+        faucet_account_id: pool.faucet_account_id,
+    };
+
+    (payout_amount, new_pool_state)
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
