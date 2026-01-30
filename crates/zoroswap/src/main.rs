@@ -94,11 +94,6 @@ fn main() {
         // Create and initialize AMM state
         let amm_state = Arc::new(AmmState::new(config, event_broadcaster.clone()).await);
 
-        info!("[INIT] Initializing faucet metadata");
-        amm_state
-            .init_faucet_metadata(&mut init_client)
-            .await
-            .map_err(|e| e.to_string())?;
         info!("[INIT] Initializing liquidity pool states");
         amm_state
             .init_liquidity_pool_states(&mut init_client)

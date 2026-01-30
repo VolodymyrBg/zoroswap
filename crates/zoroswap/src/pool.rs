@@ -62,7 +62,11 @@ impl PoolState {
         }
     }
 
-    pub fn update_state(&mut self, new_balances: PoolBalances, new_lp_total_supply: u64) -> AccountId {
+    pub fn update_state(
+        &mut self,
+        new_balances: PoolBalances,
+        new_lp_total_supply: u64,
+    ) -> AccountId {
         self.balances = new_balances;
         self.lp_total_supply = new_lp_total_supply;
         self.faucet_account_id

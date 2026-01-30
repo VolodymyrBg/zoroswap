@@ -24,7 +24,6 @@ pub struct AmmState {
     note_ids: DashMap<Uuid, String>,
     liquidity_pools: DashMap<AccountId, PoolState>,
     oracle_prices: DashMap<AccountId, PriceData>,
-    faucet_metadata: DashMap<AccountId, BasicFungibleFaucet>,
     config: Arc<Config>,
     broadcaster: Arc<EventBroadcaster>,
 }
@@ -39,7 +38,6 @@ impl AmmState {
             liquidity_pools: DashMap::new(),
             config: Arc::new(config),
             oracle_prices: DashMap::new(),
-            faucet_metadata: DashMap::new(),
             broadcaster,
         }
     }
@@ -58,16 +56,6 @@ impl AmmState {
                 .insert(liq_pool_config.faucet_id, new_liq_pool_state);
         }
         info!("Successfully initiated / synced pool states from the chain.");
-        Ok(())
-    }
-
-    pub async fn init_faucet_metadata(&self, client: &mut MidenClient) -> Result<()> {
-        for liq_pool in self.config.liquidity_pools.iter() {
-            if let Some(acc) = client.get_account(liq_pool.faucet_id).await? {
-                let faucet: BasicFungibleFaucet = BasicFungibleFaucet::try_from(acc.account())?;
-                self.faucet_metadata.insert(liq_pool.faucet_id, faucet);
-            }
-        }
         Ok(())
     }
 
@@ -150,10 +138,6 @@ impl AmmState {
         &self.liquidity_pools
     }
 
-    pub fn faucet_metadata(&self) -> &DashMap<AccountId, BasicFungibleFaucet> {
-        &self.faucet_metadata
-    }
-
     pub fn oracle_prices(&self) -> &DashMap<AccountId, PriceData> {
         &self.oracle_prices
     }
@@ -180,7 +164,7 @@ impl AmmState {
         let price = price_in.price as f64 / price_out.price as f64;
         let price = U256::from(price * 1e12);
         info!(
-            "Price for swap: {price:?}. Price in: {}, Price out: {}",
+            "Price for pair: {price:?}. Price in: {}, Price out: {}",
             price_in.price, price_out.price
         );
         Ok(price)

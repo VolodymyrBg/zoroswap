@@ -618,7 +618,9 @@ impl TradingEngine {
                     expected_future_notes.push((payout.details, payout.tag));
                     expected_output_recipients.push(payout.recipient);
                     input_notes.push((payout.note, payout.args));
-                    advice_map.insert(advice_key.into(), payout.advice_map_value);
+                    advice_map.insert(advice_key, payout.advice_map_value);
+
+                    // TODO: if this fails, return funds
                 }
                 NoteExecutionDetails::ConsumeWithArgs((note, args)) => {
                     input_notes.push((note, Some(args)));
@@ -768,25 +770,18 @@ impl TradingEngine {
             "Liquidity pool for faucet ID {} doesnt exist in state.",
             asset_out_id
         ))?;
-        let base_pool_faucet = self
+
+        let base_pool_decimals = self
             .state
-            .faucet_metadata()
-            .get(&asset_in_id)
-            .ok_or(anyhow!(
-                "Faucet metadata for faucet ID {} doesnt exist in state.",
-                asset_in_id
-            ))?;
-        let quote_pool_faucet = self
+            .config()
+            .get_asset_decimals_by_faucet_id(&asset_in_id)?;
+        let quote_pool_decimals = self
             .state
-            .faucet_metadata()
-            .get(&asset_out_id)
-            .ok_or(anyhow!(
-                "Faucet metadata for faucet ID {} doesnt exist in state.",
-                asset_out_id
-            ))?;
+            .config()
+            .get_asset_decimals_by_faucet_id(&asset_out_id)?;
         Ok((
-            (*base_pool_state, base_pool_faucet.decimals()),
-            (*quote_pool_state, quote_pool_faucet.decimals()),
+            (*base_pool_state, base_pool_decimals),
+            (*quote_pool_state, quote_pool_decimals),
         ))
     }
 }
@@ -797,7 +792,7 @@ mod tests {
     use crate::{
         config::{Config, LiquidityPoolConfig},
         oracle_sse::PriceData,
-        pool::{get_deposit_lp_amount_out, PoolBalances, PoolState},
+        pool::{PoolBalances, PoolState, get_deposit_lp_amount_out},
         websocket::EventBroadcaster,
     };
     use chrono::Utc;
@@ -898,16 +893,22 @@ mod tests {
 
             let mut pool_a = PoolState::new(pool_account_id, faucet_a_id);
             let mut pool_b = PoolState::new(pool_account_id, faucet_b_id);
-            pool_a.update_state(PoolBalances {
-                reserve: U256::from(1_000_000_00000000u64),
-                reserve_with_slippage: U256::from(1_000_000_00000000u64),
-                total_liabilities: U256::from(1_000_000_00000000u64),
-            }, 1_000_000_00000000u64);
-            pool_b.update_state(PoolBalances {
-                reserve: U256::from(1_000_000_00000000u64),
-                reserve_with_slippage: U256::from(1_000_000_00000000u64),
-                total_liabilities: U256::from(1_000_000_00000000u64),
-            }, 1_000_000_00000000u64);
+            pool_a.update_state(
+                PoolBalances {
+                    reserve: U256::from(1_000_000_00000000u64),
+                    reserve_with_slippage: U256::from(1_000_000_00000000u64),
+                    total_liabilities: U256::from(1_000_000_00000000u64),
+                },
+                1_000_000_00000000u64,
+            );
+            pool_b.update_state(
+                PoolBalances {
+                    reserve: U256::from(1_000_000_00000000u64),
+                    reserve_with_slippage: U256::from(1_000_000_00000000u64),
+                    total_liabilities: U256::from(1_000_000_00000000u64),
+                },
+                1_000_000_00000000u64,
+            );
             state.liquidity_pools().insert(faucet_a_id, pool_a);
             state.liquidity_pools().insert(faucet_b_id, pool_b);
 
