@@ -1,4 +1,4 @@
-use crate::{common::instantiate_client, config::Config};
+use crate::{common::instantiate_faucet_client, config::Config};
 use anyhow::Result;
 use chrono::Utc;
 use miden_client::{
@@ -38,7 +38,7 @@ impl GuardedFaucet {
         // Create our own client for faucet operations (with retry for DB contention)
         let mut client = None;
         for attempt in 1..=5 {
-            match instantiate_client(self.config.clone(), &self.config.store_path).await {
+            match instantiate_faucet_client(self.config.clone(), self.config.store_path).await {
                 Ok(c) => {
                     client = Some(c);
                     break;
@@ -122,7 +122,7 @@ impl GuardedFaucet {
         recipient_id: AccountId,
         amount: u64,
     ) -> Result<String> {
-        client.sync_state().await?;
+        // client.sync_state().await?;
 
         let fungible_asset = FungibleAsset::new(faucet_id, amount)?;
 
@@ -153,7 +153,7 @@ impl GuardedFaucet {
             })?;
 
         info!("Mint transaction submitted. TxID: {:?}", tx_id);
-        client.sync_state().await?;
+        // client.sync_state().await?;
 
         Ok(format!("{:?}", tx_id))
     }

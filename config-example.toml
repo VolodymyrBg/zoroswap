@@ -1,4 +1,4 @@
-pool_account_id = "mlcl1aqfasg6kcvwejypuvrs2a8yzksxcefph"
+pool_account_id = "mtst1azyddajvvc4kcyqfnjutzewrf5gw9ts7"
 
 [[liquidity_pools]]
 name = "Bitcoin pool"

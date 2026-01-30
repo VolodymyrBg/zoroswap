@@ -6,9 +6,15 @@ use miden_client::{
         Note, NoteAssets, NoteError, NoteExecutionHint, NoteMetadata, NoteRecipient, NoteTag,
         NoteType,
     },
+    sync::StateSync,
 };
+use miden_client::{
+    DebugMode, builder::ClientBuilder, keystore::FilesystemKeyStore, rpc::GrpcClient,
+};
+use miden_client_sqlite_store::{ClientBuilderSqliteExt, SqliteStore};
 use miden_lib::{note::utils::build_p2id_recipient, transaction::TransactionKernel};
 use rusqlite::Connection;
+use std::sync::Arc;
 use std::{fs, path::PathBuf};
 use tracing::{debug, info, warn};
 
@@ -73,12 +79,6 @@ pub async fn instantiate_client(
     config: Config,
     store_path: &str,
 ) -> Result<MidenClient, ClientError> {
-    use miden_client::{
-        DebugMode, builder::ClientBuilder, keystore::FilesystemKeyStore, rpc::GrpcClient,
-    };
-    use miden_client_sqlite_store::ClientBuilderSqliteExt;
-    use std::sync::Arc;
-
     info!("Creating a new Miden Client");
     info!("Keystore path: {}", config.keystore_path);
     info!("Database path: {}", store_path);
@@ -102,15 +102,51 @@ pub async fn instantiate_client(
         .await?;
     info!("Importing pool account and faucets");
     client.import_account_by_id(config.pool_account_id).await?;
-    for pool in &config.liquidity_pools {
-        info!("Importing faucet: {}", pool.faucet_id.to_hex());
-        client.import_account_by_id(pool.faucet_id).await?;
-        client.sync_state().await?;
-    }
+    // for pool in &config.liquidity_pools {
+    //     info!("Importing faucet: {}", pool.faucet_id.to_hex());
+    //     // client.import_account_by_id(pool.faucet_id).await?;
+    //     // client.sync_state().await?;
+    // }
     client
         .add_note_tag(NoteTag::from_account_id(config.pool_account_id))
         .await?;
     client.sync_state().await?;
+    info!("Miden client synced and ready");
+    Ok(client)
+}
+
+pub async fn instantiate_faucet_client(config: Config, store_path: &str) -> Result<MidenClient> {
+    info!("Creating a new Faucet Miden Client");
+    info!("Keystore path: {}", config.keystore_path);
+    info!("Database path: {}", store_path);
+
+    let timeout_ms = 10_000;
+    let rpc_api = Arc::new(GrpcClient::new(&config.miden_endpoint, timeout_ms));
+    let keystore = FilesystemKeyStore::new(config.keystore_path.into())
+        .unwrap_or_else(|err| {
+            panic!(
+                "Failed to create keystore at {}: {err:?}",
+                config.keystore_path
+            )
+        })
+        .into();
+    let mut client = ClientBuilder::new()
+        .rpc(rpc_api.clone())
+        .authenticator(keystore)
+        .sqlite_store(store_path.into())
+        .in_debug_mode(DebugMode::Enabled)
+        .build()
+        .await?;
+    info!("Importing pool account and faucets");
+    // client.import_account_by_id(config.pool_account_id).await?;
+    for pool in &config.liquidity_pools {
+        info!("Importing faucet: {}", pool.faucet_id.to_hex());
+        client.import_account_by_id(pool.faucet_id).await?;
+        // client.sync_state().await?;
+    }
+    client
+        .add_note_tag(NoteTag::from_account_id(config.pool_account_id))
+        .await?;
     info!("Miden client synced and ready");
     Ok(client)
 }
