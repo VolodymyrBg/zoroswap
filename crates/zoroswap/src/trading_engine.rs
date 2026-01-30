@@ -779,10 +779,6 @@ impl TradingEngine {
             .state
             .config()
             .get_asset_decimals_by_faucet_id(&asset_out_id)?;
-        info!(
-            "DECIMALS base {} quote {}",
-            base_pool_decimals, quote_pool_decimals
-        );
         Ok((
             (*base_pool_state, base_pool_decimals),
             (*quote_pool_state, quote_pool_decimals),
