@@ -6,12 +6,11 @@ use miden_client::{
         Note, NoteAssets, NoteError, NoteExecutionHint, NoteMetadata, NoteRecipient, NoteTag,
         NoteType,
     },
-    sync::StateSync,
 };
 use miden_client::{
     DebugMode, builder::ClientBuilder, keystore::FilesystemKeyStore, rpc::GrpcClient,
 };
-use miden_client_sqlite_store::{ClientBuilderSqliteExt, SqliteStore};
+use miden_client_sqlite_store::ClientBuilderSqliteExt;
 use miden_lib::{note::utils::build_p2id_recipient, transaction::TransactionKernel};
 use rusqlite::Connection;
 use std::sync::Arc;
