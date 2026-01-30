@@ -82,7 +82,6 @@ pub async fn instantiate_client(
     info!("Creating a new Miden Client");
     info!("Keystore path: {}", config.keystore_path);
     info!("Database path: {}", store_path);
-
     let timeout_ms = 10_000;
     let rpc_api = Arc::new(GrpcClient::new(&config.miden_endpoint, timeout_ms));
     let keystore = FilesystemKeyStore::new(config.keystore_path.into())
@@ -102,11 +101,6 @@ pub async fn instantiate_client(
         .await?;
     info!("Importing pool account and faucets");
     client.import_account_by_id(config.pool_account_id).await?;
-    // for pool in &config.liquidity_pools {
-    //     info!("Importing faucet: {}", pool.faucet_id.to_hex());
-    //     // client.import_account_by_id(pool.faucet_id).await?;
-    //     // client.sync_state().await?;
-    // }
     client
         .add_note_tag(NoteTag::from_account_id(config.pool_account_id))
         .await?;
@@ -138,11 +132,9 @@ pub async fn instantiate_faucet_client(config: Config, store_path: &str) -> Resu
         .build()
         .await?;
     info!("Importing pool account and faucets");
-    // client.import_account_by_id(config.pool_account_id).await?;
     for pool in &config.liquidity_pools {
         info!("Importing faucet: {}", pool.faucet_id.to_hex());
         client.import_account_by_id(pool.faucet_id).await?;
-        // client.sync_state().await?;
     }
     client
         .add_note_tag(NoteTag::from_account_id(config.pool_account_id))
