@@ -311,11 +311,11 @@ pub fn get_curve_amount_out(
     // COMPUTE
     // ADJUST FOR IN TOKEN POOL IMBALANCE
     debug!(
-        "Curve swap input pool state",
         base_pool_reserve = %base_pool.balances.reserve,
         base_pool_total_liabilities = %base_pool.balances.total_liabilities,
         base_pool_reserve_with_slippage = %base_pool.balances.reserve_with_slippage,
         amount_in = %amount_in,
+        "Curve swap input pool state"
     );
     let effective_amount_in = curve_in.inverse_horizontal(
         I256::from_str(&base_pool.balances.reserve.to_string())
@@ -330,11 +330,11 @@ pub fn get_curve_amount_out(
     );
 
     debug!(
-        "Curve swap effective amount calculation",
         base_pool_reserve = %base_pool.balances.reserve,
         effective_amount_in = %effective_amount_in,
         reserve_plus_effective = %(base_pool.balances.reserve + effective_amount_in),
         total_liabilities = %base_pool.balances.total_liabilities,
+        "Curve swap effective amount calculation"
     );
     if (base_pool.balances.reserve + effective_amount_in)
         > (U256::from(2) * base_pool.balances.total_liabilities)
@@ -344,10 +344,10 @@ pub fn get_curve_amount_out(
 
     // AMOUNT OUT BEFORE FEES AND OUT TOKEN POOL IMBALANCE
     debug!(
-        "Curve swap decimals and price",
         asset_decimals_in = %asset_decimals_in,
         asset_decimals_out = %asset_decimals_out,
         price = %price,
+        "Curve swap decimals and price"
     );
     let scaling_factor = if asset_decimals_in > asset_decimals_out {
         price_scaling_factor * U256::from(10).pow(asset_decimals_in - asset_decimals_out)
@@ -356,10 +356,10 @@ pub fn get_curve_amount_out(
     };
 
     debug!(
-        "Curve swap scaling",
         effective_amount_in = %effective_amount_in,
         price = %price,
         scaling_factor = %scaling_factor,
+        "Curve swap scaling"
     );
     let raw_amount_out = effective_amount_in * price / scaling_factor;
 
@@ -373,11 +373,11 @@ pub fn get_curve_amount_out(
     let reduced_reserve_out = quote_pool.balances.reserve - raw_amount_out + fee_amount;
 
     debug!(
-        "Curve swap output pool state",
         reduced_reserve_out = %reduced_reserve_out,
         quote_pool_total_liabilities = %quote_pool.balances.total_liabilities,
         quote_pool_reserve_with_slippage = %quote_pool.balances.reserve_with_slippage,
         asset_decimals_out = %asset_decimals_out,
+        "Curve swap output pool state"
     );
 
     let mut actual_lp_fee_amount = curve_out.inverse_diagonal(
@@ -412,12 +412,12 @@ pub fn get_curve_amount_out(
         quote_pool.balances.reserve_with_slippage - reserve_with_slippage_after_amount_out;
 
     debug!(
-        "Curve swap calculation",
         effective_amount_in = %effective_amount_in,
         raw_amount_out = %raw_amount_out,
         reserve_with_slippage_out = %quote_pool.balances.reserve_with_slippage,
         reserve_with_slippage_after_amount_out = %reserve_with_slippage_after_amount_out,
         amount_out = %amount_out,
+        "Curve swap calculation"
     );
 
     //     reserver_with_slippage1 = reserver_with_slippage0 + amount_in

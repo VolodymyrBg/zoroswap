@@ -94,11 +94,13 @@ impl Order {
             order_type: OrderType::Swap,
         };
 
-        info!("New swap order from {}: {order:?}. Swapping {} of faucet {} for faucet {}.",
-            creator_id.to_hex(),
-            asset_in.amount(),
-            asset_in.faucet_id().to_hex(),
-            asset_out.faucet_id().to_hex()
+        info!(
+            order = ?order,
+            creator = %creator_id.to_hex(),
+            amount_in = asset_in.amount(),
+            faucet_in = %asset_in.faucet_id().to_hex(),
+            faucet_out = %asset_out.faucet_id().to_hex(),
+            "New swap order"
         );
 
         Ok(order)
@@ -148,10 +150,13 @@ impl Order {
             order_type: OrderType::Deposit,
         };
 
-        info!("New deposit order from {}: {order:?}. Depositing {} to faucet {}.",
-            creator_id.to_hex()
-            asset_in.amount(),
-            asset_in.faucet_id().to_hex());
+        info!(
+            order = ?order,
+            creator = %creator_id.to_hex(),
+            amount = asset_in.amount(),
+            faucet = %asset_in.faucet_id().to_hex(),
+            "New deposit order"
+        );
 
         Ok(order)
     }
@@ -177,11 +182,14 @@ impl Order {
         let creator_id = AccountId::try_from([creator_prefix, creator_suffix])
             .or(Err(anyhow!("Couldn't parse creator_id from order note")))?;
 
-        debug!("Withdraw note creator_id: {:?}", creator_id);
-        debug!("Withdraw note deadline: {:?}", deadline);
-        debug!("Withdraw note p2id_tag: {:?}", p2id_tag);
-        debug!("Withdraw note asset_in: {:?}", asset_in);
-        debug!("Withdraw note asset_out: {:?}", asset_out);
+        debug!(
+            creator_id = ?creator_id,
+            deadline = ?deadline,
+            p2id_tag = p2id_tag,
+            asset_in = ?asset_in,
+            asset_out = ?asset_out,
+            "Parsed withdraw note"
+        );
 
         let order = Order {
             created_at: Utc::now(),
@@ -196,10 +204,13 @@ impl Order {
             order_type: OrderType::Withdraw,
         };
 
-        info!("New withdraw order from {}: {order:?}. Withdrawing {} from faucet {}",
-            creator_id.to_hex(),
-            asset_in.amount(),
-            asset_out.faucet_id().to_hex());
+        info!(
+            order = ?order,
+            creator = %creator_id.to_hex(),
+            lp_amount = asset_in.amount(),
+            faucet = %asset_out.faucet_id().to_hex(),
+            "New withdraw order"
+        );
 
         Ok(order)
     }
