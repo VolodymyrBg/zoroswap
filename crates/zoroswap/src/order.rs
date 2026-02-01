@@ -54,7 +54,7 @@ impl Order {
         }
         let asset_in = asset_in.unwrap_fungible();
         let note_inputs: &[Felt] = note.inputs().values();
-        debug!("Note inputs: {:?}", note_inputs);
+        debug!(note_inputs = ?note_inputs, "Parsing swap note");
         let requested: &[Felt] = note_inputs
             .get(..4)
             .ok_or(anyhow!("note has fewer than 4 inputs"))?;
@@ -118,14 +118,12 @@ impl Order {
             return Err(anyhow!("Note has no fungible assets!"));
         }
         let note_inputs: &[Felt] = note.inputs().values();
-        debug!("Deposit note inputs: {:?}", note_inputs);
+        debug!(note_inputs = ?note_inputs, "Parsing deposit note");
         let vals = note.inputs().values();
-        debug!("Deposit note inputs values: {vals:?}");
         let asset_in = asset_in.unwrap_fungible();
-        debug!("Deposit asset_in: {asset_in:?}");
         let min_lp_out: u64 = vals[1].into();
         let asset_out = FungibleAsset::new(asset_in.faucet_id(), min_lp_out)?;
-        debug!("Deposit asset_out: {:?}", asset_out);
+        debug!(asset_in = ?asset_in, asset_out = ?asset_out, "Deposit note assets");
 
         let deadline: u64 = vals[2].into();
         let p2id_tag: u64 = vals[3].into();
@@ -163,7 +161,7 @@ impl Order {
 
     pub fn from_withdraw_note(note: &Note) -> Result<Order> {
         let note_inputs: &[Felt] = note.inputs().values();
-        debug!("Note inputs: {:?}", note_inputs);
+        debug!(note_inputs = ?note_inputs, "Parsing withdraw note");
 
         let vals = note.inputs().values();
         let lp_withdraw_amount: u64 = vals[5].into();
